@@ -6,7 +6,26 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Plus, Calendar, Clock, MapPin, Users, Edit, Trash2, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
-import { formatDate, formatTime, getStatusColor, getStatusText } from '@/lib/utils'
+// import { formatDate, formatTime, getStatusColor, getStatusText } from '@/lib/utils'
+
+const formatDate = (date: string) => new Date(date).toLocaleDateString('id-ID')
+const formatTime = (time: string) => time
+const getStatusColor = (status: string) => {
+  const colors = {
+    'scheduled': 'bg-blue-100 text-blue-800',
+    'active': 'bg-green-100 text-green-800',
+    'completed': 'bg-gray-100 text-gray-800'
+  }
+  return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800'
+}
+const getStatusText = (status: string) => {
+  const texts = {
+    'scheduled': 'Terjadwal',
+    'active': 'Aktif',
+    'completed': 'Selesai'
+  }
+  return texts[status as keyof typeof texts] || status
+}
 
 interface Session {
   id: string
