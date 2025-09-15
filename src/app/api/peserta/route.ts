@@ -95,7 +95,7 @@ export async function PUT(request: NextRequest) {
       updateData.password_hash = password
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('peserta')
       .update(updateData)
       .eq('id', id)
