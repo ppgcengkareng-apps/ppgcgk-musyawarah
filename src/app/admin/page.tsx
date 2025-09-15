@@ -14,7 +14,7 @@ const supabase = createClient(
 
 interface RecentSession {
   id: string
-  judul: string
+  nama_sesi: string
   tanggal: string
   waktu_mulai: string
   status: string
@@ -67,18 +67,18 @@ export default function AdminDashboard() {
       const { count: activeSessions } = await supabase
         .from('sesi_musyawarah')
         .select('*', { count: 'exact', head: true })
-        .eq('status', 'aktif')
+        .eq('status', 'active')
 
       // Get pending notes
       const { count: pendingNotes } = await supabase
-        .from('notulensi')
+        .from('notulensi_sesi')
         .select('*', { count: 'exact', head: true })
-        .eq('status', 'pending')
+        .eq('status', 'pending_approval')
 
       // Get recent sessions
       const { data: recentSessions } = await supabase
         .from('sesi_musyawarah')
-        .select('id, judul, tanggal, waktu_mulai, status')
+        .select('id, nama_sesi, tanggal, waktu_mulai, status')
         .order('created_at', { ascending: false })
         .limit(5)
 
@@ -88,7 +88,7 @@ export default function AdminDashboard() {
         .select(`
           id, status_kehadiran, created_at,
           peserta:peserta_id(nama),
-          sesi:sesi_id(judul)
+          sesi:sesi_id(nama_sesi)
         `)
         .order('created_at', { ascending: false })
         .limit(5)
@@ -233,10 +233,10 @@ export default function AdminDashboard() {
                 Tambah Peserta
               </Button>
             </Link>
-            <Link href="/admin/notulensi/approval">
+            <Link href="/admin/notulensi">
               <Button variant="outline" className="w-full justify-start">
                 <FileText className="w-4 h-4 mr-2" />
-                Review Notulensi
+                Kelola Notulensi
               </Button>
             </Link>
           </CardContent>
@@ -256,7 +256,7 @@ export default function AdminDashboard() {
                   <div key={sesi.id} className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 truncate">
-                        {sesi.judul}
+                        {sesi.nama_sesi}
                       </p>
                       <p className="text-xs text-gray-500">
                         {formatDate(sesi.tanggal)} • {sesi.waktu_mulai}
@@ -291,7 +291,7 @@ export default function AdminDashboard() {
                         {absensi.peserta?.nama || 'Unknown'}
                       </p>
                       <p className="text-xs text-gray-500 truncate">
-                        {absensi.sesi?.judul || 'Unknown Session'}
+                        {absensi.sesi?.nama_sesi || 'Unknown Session'}
                       </p>
                     </div>
                     <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getAttendanceColor(absensi.status_kehadiran)}`}>
