@@ -83,8 +83,9 @@ export default function AdminLoginPage() {
             <div className="mt-6 p-4 bg-gray-50 rounded-lg">
               <h4 className="text-sm font-medium text-gray-700 mb-2">Demo Credentials:</h4>
               <div className="text-xs text-gray-600 space-y-1">
-                <p><strong>Email:</strong> admin@ppg.kemendikbud.go.id</p>
-                <p><strong>Password:</strong> password123</p>
+                <p><strong>Super Admin:</strong> suppcon / AdInsTOPAJA2018%qaz</p>
+                <p><strong>Admin:</strong> siti.nurhaliza@ppg.kemendikbud.go.id / password123</p>
+                <p><strong>Sekretaris:</strong> maya.sari@ppg.kemendikbud.go.id / password123</p>
               </div>
             </div>
           </CardContent>
