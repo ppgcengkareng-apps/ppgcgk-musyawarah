@@ -60,14 +60,14 @@ export async function POST(request: NextRequest) {
       nama_sesi,
       deskripsi: deskripsi || null,
       tanggal,
-      waktu_mulai,
-      waktu_selesai,
+      waktu_mulai: waktu_mulai.substring(0, 8),
+      waktu_selesai: waktu_selesai.substring(0, 8),
       lokasi: lokasi || null,
       tipe: tipe || 'offline',
       maksimal_peserta: parseInt(maksimal_peserta) || 100,
       status: 'scheduled',
       created_by: createdBy,
-      timezone: 'Asia/Jakarta',
+      timezone: 'WIB',
       batas_absen_mulai: 30,
       batas_absen_selesai: 15
     }
