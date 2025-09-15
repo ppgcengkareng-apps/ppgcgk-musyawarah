@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
       .limit(1)
       .single()
 
-    let createdBy = existingUser?.id
+    let createdBy = (existingUser as any)?.id
 
     // If no user exists, create a default admin user
     if (!createdBy) {
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
         .select('id')
         .single()
       
-      createdBy = newUser?.id || '00000000-0000-0000-0000-000000000000'
+      createdBy = (newUser as any)?.id || '00000000-0000-0000-0000-000000000000'
     }
 
     const insertData = {
