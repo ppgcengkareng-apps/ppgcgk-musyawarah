@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
 
     const supabase = createServerClient()
 
-    const { data: participant, error } = await supabase
+    const { data: participant, error } = await (supabase as any)
       .from('peserta')
       .insert({
         nama,
