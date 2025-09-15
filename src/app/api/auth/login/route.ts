@@ -70,6 +70,37 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Create Supabase auth session
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: password
+    })
+
+    if (authError) {
+      // If auth fails, try to sign up first then sign in
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: user.email,
+        password: password,
+        options: {
+          data: {
+            nama: user.nama,
+            role: user.role
+          }
+        }
+      })
+      
+      if (!signUpError) {
+        const { data: authData2, error: authError2 } = await supabase.auth.signInWithPassword({
+          email: user.email,
+          password: password
+        })
+        
+        if (authError2) {
+          console.error('Auth error after signup:', authError2)
+        }
+      }
+    }
+
     // Update last login
     await supabase
       .from('peserta')

@@ -2,13 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { createClient } from '@supabase/supabase-js'
 import AdminNavigation from '@/components/admin/admin-navigation'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 export default function AdminLayout({
   children,
@@ -20,24 +14,12 @@ export default function AdminLayout({
   const pathname = usePathname()
   
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      
-      if (session) {
-        const { data: profile } = await supabase
-          .from('peserta')
-          .select('nama, role, email')
-          .eq('id', session.user.id)
-          .single()
-        
-        if (profile && ['super_admin', 'admin', 'sekretaris_ppg'].includes(profile.role)) {
-          setUser(profile)
-        }
-      }
-      setLoading(false)
+    // Check localStorage for user data
+    const userData = localStorage.getItem('admin_user')
+    if (userData) {
+      setUser(JSON.parse(userData))
     }
-    
-    getUser()
+    setLoading(false)
   }, [])
   
   // Show login page without navigation

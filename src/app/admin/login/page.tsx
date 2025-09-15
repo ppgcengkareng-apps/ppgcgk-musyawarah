@@ -24,6 +24,8 @@ export default function AdminLoginPage() {
       const data = await response.json()
       
       if (response.ok) {
+        // Save user data to localStorage
+        localStorage.setItem('admin_user', JSON.stringify(data.user))
         alert(`Login berhasil! Selamat datang ${data.user.nama}`)
         window.location.href = '/admin'
       } else {

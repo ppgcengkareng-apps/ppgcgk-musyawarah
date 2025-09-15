@@ -49,6 +49,8 @@ export default function AdminNavigation({ user }: AdminNavigationProps) {
       })
 
       if (response.ok) {
+        // Clear localStorage
+        localStorage.removeItem('admin_user')
         toast.success('Logout berhasil')
         // Force page reload to clear all state
         window.location.href = '/'
