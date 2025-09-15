@@ -65,7 +65,7 @@ export async function PUT(
       updated_at: new Date().toISOString()
     }
 
-    const { data: session, error } = await supabase
+    const { data: session, error } = await (supabase as any)
       .from('sesi_musyawarah')
       .update(updateData)
       .eq('id', id)
