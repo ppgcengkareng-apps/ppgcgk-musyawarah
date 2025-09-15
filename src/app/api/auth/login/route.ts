@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update last login
-    await supabase
+    await (supabase as any)
       .from('peserta')
       .update({ last_login: new Date().toISOString() })
       .eq('id', userData.id)
