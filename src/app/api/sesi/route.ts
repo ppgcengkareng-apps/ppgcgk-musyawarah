@@ -51,6 +51,16 @@ export async function POST(request: NextRequest) {
 
     const supabase = createServerClient()
 
+    // Get first admin user as creator
+    const { data: adminUser } = await supabase
+      .from('peserta')
+      .select('id')
+      .eq('role', 'admin')
+      .limit(1)
+      .single()
+
+    const createdBy = adminUser?.id || '00000000-0000-0000-0000-000000000000'
+
     const { data: session, error } = await supabase
       .from('sesi_musyawarah')
       .insert({
@@ -63,7 +73,7 @@ export async function POST(request: NextRequest) {
         tipe: tipe || 'offline',
         maksimal_peserta: maksimal_peserta || 100,
         status: 'scheduled',
-        created_by: '1' // Static user ID for now
+        created_by: createdBy
       })
       .select()
       .single()

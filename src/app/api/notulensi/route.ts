@@ -43,16 +43,28 @@ export async function POST(request: NextRequest) {
     const supabase = createServerClient()
     const body = await request.json()
     
+    // Get first admin user as creator
+    const { data: adminUser } = await supabase
+      .from('peserta')
+      .select('id')
+      .eq('role', 'admin')
+      .limit(1)
+      .single()
+
+    const createdBy = adminUser?.id || '00000000-0000-0000-0000-000000000000'
+
     const { data, error } = await supabase
       .from('notulensi_sesi')
       .insert({
         sesi_id: body.sesi_id,
         judul: body.judul,
-        isi_notulensi: body.isi_notulensi,
-        kesimpulan: body.kesimpulan,
+        agenda: body.isi_notulensi || '',
+        pembahasan: body.isi_notulensi || '',
+        keputusan: body.kesimpulan,
         tindak_lanjut: body.tindak_lanjut,
         status: 'draft',
-        version: 1
+        version: 1,
+        dibuat_oleh: createdBy
       })
       .select()
       .single()
