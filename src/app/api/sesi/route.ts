@@ -31,6 +31,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    console.log('Request body:', body)
+    
     const { 
       nama_sesi, 
       deskripsi, 
@@ -51,36 +53,37 @@ export async function POST(request: NextRequest) {
 
     const supabase = createServerClient()
 
-    // Get first admin user as creator
-    const { data: adminUser } = await supabase
-      .from('peserta')
-      .select('id')
-      .eq('role', 'admin')
-      .limit(1)
-      .single()
+    // Use a simple UUID for created_by
+    const createdBy = 'f47ac10b-58cc-4372-a567-0e02b2c3d479'
 
-    const createdBy = adminUser?.id || '00000000-0000-0000-0000-000000000000'
+    const insertData = {
+      nama_sesi,
+      deskripsi: deskripsi || null,
+      tanggal,
+      waktu_mulai,
+      waktu_selesai,
+      lokasi: lokasi || null,
+      tipe: tipe || 'offline',
+      maksimal_peserta: parseInt(maksimal_peserta) || 100,
+      status: 'scheduled',
+      created_by: createdBy,
+      timezone: 'Asia/Jakarta',
+      batas_absen_mulai: 30,
+      batas_absen_selesai: 15
+    }
+
+    console.log('Insert data:', insertData)
 
     const { data: session, error } = await supabase
       .from('sesi_musyawarah')
-      .insert({
-        nama_sesi,
-        deskripsi,
-        tanggal,
-        waktu_mulai,
-        waktu_selesai,
-        lokasi,
-        tipe: tipe || 'offline',
-        maksimal_peserta: maksimal_peserta || 100,
-        status: 'scheduled',
-        created_by: createdBy
-      })
+      .insert(insertData)
       .select()
       .single()
 
     if (error) {
+      console.error('Supabase error:', error)
       return NextResponse.json(
-        { error: 'Gagal membuat sesi' },
+        { error: `Database error: ${error.message}` },
         { status: 500 }
       )
     }
@@ -90,7 +93,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Create session error:', error)
     return NextResponse.json(
-      { error: 'Terjadi kesalahan sistem' },
+      { error: `Server error: ${error.message}` },
       { status: 500 }
     )
   }
