@@ -50,7 +50,8 @@ export default function AdminNavigation({ user }: AdminNavigationProps) {
 
       if (response.ok) {
         toast.success('Logout berhasil')
-        router.push('/admin/login')
+        // Force page reload to clear all state
+        window.location.href = '/'
       } else {
         toast.error('Gagal logout')
       }
