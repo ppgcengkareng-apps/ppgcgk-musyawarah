@@ -30,13 +30,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if session exists and is active
-    const { data: session } = await supabase
+    const { data: session, error: sessionError } = await supabase
       .from('sesi_musyawarah')
       .select('status, tanggal, waktu_mulai, waktu_selesai, batas_absen_mulai, batas_absen_selesai')
       .eq('id', sesi_id)
       .single()
 
-    if (!session) {
+    if (sessionError || !session) {
       return NextResponse.json(
         { error: 'Sesi tidak ditemukan' },
         { status: 404 }
