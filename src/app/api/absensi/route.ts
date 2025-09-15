@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Insert attendance record
-    const { data: attendance, error } = await supabase
+    const { data: attendance, error } = await (supabase as any)
       .from('absensi')
       .insert({
         peserta_id,
@@ -94,20 +94,24 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Log activity
-    await supabase
-      .from('log_aktivitas')
-      .insert({
-        peserta_id,
-        aktivitas: 'attendance_recorded',
-        detail: { 
-          sesi_id, 
-          status: finalStatus,
-          ip: request.ip 
-        },
-        ip_address: request.ip,
-        user_agent: request.headers.get('user-agent')
-      })
+    // Log activity (optional - remove if table doesn't exist)
+    try {
+      await (supabase as any)
+        .from('log_aktivitas')
+        .insert({
+          peserta_id,
+          aktivitas: 'attendance_recorded',
+          detail: { 
+            sesi_id, 
+            status: finalStatus,
+            ip: request.ip 
+          },
+          ip_address: request.ip,
+          user_agent: request.headers.get('user-agent')
+        })
+    } catch (logError) {
+      console.log('Log activity failed:', logError)
+    }
 
     return NextResponse.json({
       success: true,
