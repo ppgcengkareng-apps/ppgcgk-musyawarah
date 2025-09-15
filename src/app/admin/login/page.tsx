@@ -11,9 +11,27 @@ export default function AdminLoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    alert('Login functionality will be implemented')
+    
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      })
+      
+      const data = await response.json()
+      
+      if (response.ok) {
+        alert(`Login berhasil! Selamat datang ${data.user.nama}`)
+        window.location.href = '/admin'
+      } else {
+        alert(data.error || 'Login gagal')
+      }
+    } catch (error) {
+      alert('Terjadi kesalahan sistem')
+    }
   }
 
   return (
