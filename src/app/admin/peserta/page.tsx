@@ -66,6 +66,59 @@ export default function ParticipantManagement() {
     return colors[role as keyof typeof colors] || 'bg-gray-100 text-gray-800'
   }
 
+  const handleDelete = async (id: string, nama: string) => {
+    if (confirm(`Apakah Anda yakin ingin menghapus peserta ${nama}?`)) {
+      try {
+        const response = await fetch(`/api/peserta?id=${id}`, {
+          method: 'DELETE'
+        })
+        
+        if (response.ok) {
+          alert('Peserta berhasil dihapus')
+          fetchParticipants() // Refresh data
+        } else {
+          alert('Gagal menghapus peserta')
+        }
+      } catch (error) {
+        alert('Terjadi kesalahan sistem')
+      }
+    }
+  }
+
+  const handleEdit = (participant: Participant) => {
+    // Simple edit with prompt for now
+    const newNama = prompt('Edit Nama:', participant.nama)
+    const newJabatan = prompt('Edit Jabatan:', participant.jabatan)
+    const newInstansi = prompt('Edit Instansi:', participant.instansi)
+    
+    if (newNama && newJabatan && newInstansi) {
+      updateParticipant(participant.id, {
+        nama: newNama,
+        jabatan: newJabatan,
+        instansi: newInstansi
+      })
+    }
+  }
+
+  const updateParticipant = async (id: string, data: any) => {
+    try {
+      const response = await fetch(`/api/peserta?id=${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      
+      if (response.ok) {
+        alert('Peserta berhasil diupdate')
+        fetchParticipants() // Refresh data
+      } else {
+        alert('Gagal mengupdate peserta')
+      }
+    } catch (error) {
+      alert('Terjadi kesalahan sistem')
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="p-6">
@@ -155,12 +208,19 @@ export default function ParticipantManagement() {
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex space-x-2">
-                        <Link href={`/admin/peserta/${participant.id}/edit`}>
-                          <Button variant="outline" size="sm">
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                        </Link>
-                        <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleEdit(participant)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-red-600 hover:text-red-700"
+                          onClick={() => handleDelete(participant.id, participant.nama)}
+                        >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>

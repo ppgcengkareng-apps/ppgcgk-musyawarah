@@ -74,3 +74,57 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+export async function PUT(request: NextRequest) {
+  try {
+    const url = new URL(request.url)
+    const id = url.searchParams.get('id')
+    const { nama, jabatan, instansi } = await request.json()
+    
+    if (!id) {
+      return NextResponse.json({ error: 'ID peserta diperlukan' }, { status: 400 })
+    }
+
+    const supabase = createServerClient()
+
+    const { data, error } = await supabase
+      .from('peserta')
+      .update({ nama, jabatan, instansi })
+      .eq('id', id)
+      .select()
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 })
+    }
+
+    return NextResponse.json({ success: true, data })
+  } catch (error) {
+    return NextResponse.json({ error: 'Terjadi kesalahan sistem' }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const url = new URL(request.url)
+    const id = url.searchParams.get('id')
+    
+    if (!id) {
+      return NextResponse.json({ error: 'ID peserta diperlukan' }, { status: 400 })
+    }
+
+    const supabase = createServerClient()
+
+    const { error } = await supabase
+      .from('peserta')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 })
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    return NextResponse.json({ error: 'Terjadi kesalahan sistem' }, { status: 500 })
+  }
+}
