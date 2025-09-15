@@ -165,7 +165,7 @@ export default function ParticipantManagement() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
-              placeholder="Cari nama, email, atau instansi..."
+              placeholder="Cari nama, username, dapuan, atau bidang..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -188,9 +188,9 @@ export default function ParticipantManagement() {
               <thead>
                 <tr className="border-b">
                   <th className="text-left py-3 px-4 font-medium">Nama</th>
-                  <th className="text-left py-3 px-4 font-medium">Email</th>
-                  <th className="text-left py-3 px-4 font-medium">Jabatan</th>
-                  <th className="text-left py-3 px-4 font-medium">Instansi</th>
+                  <th className="text-left py-3 px-4 font-medium">Username</th>
+                  <th className="text-left py-3 px-4 font-medium">Dapuan</th>
+                  <th className="text-left py-3 px-4 font-medium">Bidang</th>
                   <th className="text-left py-3 px-4 font-medium">Role</th>
                   <th className="text-left py-3 px-4 font-medium">Status</th>
                   <th className="text-left py-3 px-4 font-medium">Aksi</th>
@@ -274,20 +274,20 @@ export default function ParticipantManagement() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium mb-1">Jabatan</label>
+                <label className="block text-sm font-medium mb-1">Dapuan</label>
                 <Input
                   value={editForm.jabatan}
                   onChange={(e) => setEditForm({...editForm, jabatan: e.target.value})}
-                  placeholder="Masukkan jabatan"
+                  placeholder="Masukkan dapuan"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium mb-1">Instansi</label>
+                <label className="block text-sm font-medium mb-1">Bidang</label>
                 <Input
                   value={editForm.instansi}
                   onChange={(e) => setEditForm({...editForm, instansi: e.target.value})}
-                  placeholder="Masukkan instansi"
+                  placeholder="Masukkan bidang"
                 />
               </div>
               

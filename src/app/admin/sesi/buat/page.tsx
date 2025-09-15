@@ -89,7 +89,7 @@ export default function CreateSession() {
                     name="nama_sesi"
                     value={formData.nama_sesi}
                     onChange={handleChange}
-                    placeholder="Contoh: Workshop Kurikulum Merdeka"
+                    placeholder="Contoh: Musyawarah PPG Daerah, Musy KBM Desa, dll"
                     required
                   />
                 </div>
@@ -165,7 +165,7 @@ export default function CreateSession() {
                     name="lokasi"
                     value={formData.lokasi}
                     onChange={handleChange}
-                    placeholder="Contoh: Auditorium Kemendikbud"
+                    placeholder="Contoh: Ruang GSG Daerah, GSG Desa, dll"
                   />
                 </div>
 
