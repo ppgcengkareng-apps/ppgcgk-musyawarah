@@ -12,8 +12,31 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
+interface RecentSession {
+  id: string
+  judul: string
+  tanggal: string
+  waktu_mulai: string
+  status: string
+}
+
+interface RecentAttendance {
+  id: string
+  status_kehadiran: string
+  created_at: string
+  peserta: { nama: string } | null
+  sesi: { judul: string } | null
+}
+
 export default function AdminDashboard() {
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<{
+    totalParticipants: number
+    totalSessions: number
+    activeSessions: number
+    pendingNotes: number
+    recentSessions: RecentSession[]
+    recentAttendance: RecentAttendance[]
+  }>({
     totalParticipants: 0,
     totalSessions: 0,
     activeSessions: 0,
@@ -229,7 +252,7 @@ export default function AdminDashboard() {
           <CardContent>
             <div className="space-y-3">
               {stats.recentSessions.length > 0 ? (
-                stats.recentSessions.map((sesi: any) => (
+                stats.recentSessions.map((sesi) => (
                   <div key={sesi.id} className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 truncate">
@@ -261,7 +284,7 @@ export default function AdminDashboard() {
           <CardContent>
             <div className="space-y-3">
               {stats.recentAttendance.length > 0 ? (
-                stats.recentAttendance.map((absensi: any) => (
+                stats.recentAttendance.map((absensi) => (
                   <div key={absensi.id} className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 truncate">
