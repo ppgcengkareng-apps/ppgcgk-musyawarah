@@ -1,0 +1,6 @@
+Saya ingin membuat website yang akan saya upload website GitHub dan otomatis deploy di vercel, dan supabase sebagai database.
+Dengan Spesifikasi seperti ini:
+1. Me 
+
+
+DOKUMENTASI:
