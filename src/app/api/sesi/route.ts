@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
 
     // If no user exists, create a default admin user
     if (!createdBy) {
-      const { data: newUser } = await supabase
+      const { data: newUser } = await (supabase as any)
         .from('peserta')
         .insert({
           nama: 'Admin System',
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
     }
     console.log('Insert data:', sanitizedData)
 
-    const { data: session, error } = await supabase
+    const { data: session, error } = await (supabase as any)
       .from('sesi_musyawarah')
       .insert(insertData)
       .select()

@@ -122,7 +122,7 @@ export async function DELETE(request: NextRequest) {
 
     const supabase = createServerClient()
 
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('peserta')
       .delete()
       .eq('id', id)
