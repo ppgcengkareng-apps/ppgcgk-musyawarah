@@ -65,7 +65,7 @@ export default function AdminLoginPage() {
                 <Input
                   id="email"
                   type="text"
-                  placeholder="suppcon atau admin@ppg.kemendikbud.go.id"
+                  placeholder="Masukkan username"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full"
@@ -91,23 +91,7 @@ export default function AdminLoginPage() {
               </Button>
             </form>
 
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
-                Bukan admin?{' '}
-                <Link href="/peserta/login" className="text-blue-600 hover:underline">
-                  Login sebagai Peserta
-                </Link>
-              </p>
-            </div>
 
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-              <h4 className="text-sm font-medium text-gray-700 mb-2">Demo Credentials:</h4>
-              <div className="text-xs text-gray-600 space-y-1">
-                <p><strong>Super Admin:</strong> suppcon / AdInsTOPAJA2018%qaz</p>
-                <p><strong>Admin:</strong> siti.nurhaliza@ppg.kemendikbud.go.id / password123</p>
-                <p><strong>Sekretaris:</strong> maya.sari@ppg.kemendikbud.go.id / password123</p>
-              </div>
-            </div>
           </CardContent>
         </Card>
       </div>
