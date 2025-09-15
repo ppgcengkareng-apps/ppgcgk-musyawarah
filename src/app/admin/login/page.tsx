@@ -58,12 +58,12 @@ export default function AdminLoginPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium text-gray-700">
-                  Email
+                  Username/Email
                 </label>
                 <Input
                   id="email"
-                  type="email"
-                  placeholder="admin@ppg.kemendikbud.go.id"
+                  type="text"
+                  placeholder="suppcon atau admin@ppg.kemendikbud.go.id"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full"
