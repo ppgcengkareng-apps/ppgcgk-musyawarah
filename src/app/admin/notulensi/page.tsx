@@ -58,7 +58,7 @@ interface MeetingNote {
 function CreateNotulensiForm() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
-  const [sessions, setSessions] = useState([])
+  const [sessions, setSessions] = useState<any[]>([])
   const [formData, setFormData] = useState({
     sesi_id: '',
     judul: '',
