@@ -53,8 +53,30 @@ export async function POST(request: NextRequest) {
 
     const supabase = createServerClient()
 
-    // Use a simple UUID for created_by
-    const createdBy = 'f47ac10b-58cc-4372-a567-0e02b2c3d479'
+    // Get any existing user as creator
+    const { data: existingUser } = await supabase
+      .from('peserta')
+      .select('id')
+      .limit(1)
+      .single()
+
+    let createdBy = existingUser?.id
+
+    // If no user exists, create a default admin user
+    if (!createdBy) {
+      const { data: newUser } = await supabase
+        .from('peserta')
+        .insert({
+          nama: 'Admin System',
+          email: 'admin@system.com',
+          role: 'admin',
+          aktif: true
+        })
+        .select('id')
+        .single()
+      
+      createdBy = newUser?.id || '00000000-0000-0000-0000-000000000000'
+    }
 
     const insertData = {
       nama_sesi,
