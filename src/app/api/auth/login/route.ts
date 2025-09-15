@@ -12,7 +12,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Debug: Check environment variables
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    
+    if (!supabaseUrl || !supabaseKey) {
+      console.error('Missing Supabase env vars:', { supabaseUrl: !!supabaseUrl, supabaseKey: !!supabaseKey })
+      return NextResponse.json(
+        { error: 'Konfigurasi database tidak lengkap' },
+        { status: 500 }
+      )
+    }
+
     const supabase = createServerClient()
+
+    // Debug: Log the query
+    console.log('Searching for user:', email)
 
     // Get user from Supabase database
     const { data: user, error: userError } = await supabase
@@ -22,17 +37,27 @@ export async function POST(request: NextRequest) {
       .eq('aktif', true)
       .single()
 
+    // Debug: Log the result
+    console.log('User query result:', { user, userError })
+
     if (userError || !user) {
       return NextResponse.json(
-        { error: 'Email atau password salah' },
+        { error: `User tidak ditemukan: ${userError?.message || 'Unknown error'}` },
         { status: 401 }
       )
     }
 
+    // Debug: Log password comparison
+    console.log('Password comparison:', { 
+      input: password, 
+      stored: user.password_hash, 
+      match: password === user.password_hash 
+    })
+
     // Simple password comparison - no hashing
     if (password !== user.password_hash) {
       return NextResponse.json(
-        { error: 'Email atau password salah' },
+        { error: 'Password salah' },
         { status: 401 }
       )
     }
@@ -64,7 +89,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Login error:', error)
     return NextResponse.json(
-      { error: 'Terjadi kesalahan sistem' },
+      { error: `Sistem error: ${error}` },
       { status: 500 }
     )
   }
