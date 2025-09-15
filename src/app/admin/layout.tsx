@@ -1,40 +1,64 @@
-import { redirect } from 'next/navigation'
-import { createServerClient } from '@/lib/supabase/server'
+'use client'
+
+import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
+import { createClient } from '@supabase/supabase-js'
 import AdminNavigation from '@/components/admin/admin-navigation'
 
-export default async function AdminLayout({
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const supabase = createServerClient()
+  const [user, setUser] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const pathname = usePathname()
   
-  // Check authentication
-  const { data: { session } } = await supabase.auth.getSession()
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (session) {
+        const { data: profile } = await supabase
+          .from('peserta')
+          .select('nama, role, email')
+          .eq('id', session.user.id)
+          .single()
+        
+        if (profile && ['super_admin', 'admin', 'sekretaris_ppg'].includes(profile.role)) {
+          setUser(profile)
+        }
+      }
+      setLoading(false)
+    }
+    
+    getUser()
+  }, [])
   
-  if (!session) {
-    return children // Allow login page to render
+  // Show login page without navigation
+  if (pathname === '/admin/login' || loading) {
+    return children
   }
-
-  // Get user profile
-  const { data: profile } = await supabase
-    .from('peserta')
-    .select('nama, role, email')
-    .eq('id', session.user.id)
-    .single()
-
-  if (!profile || !['super_admin', 'admin', 'sekretaris_ppg'].includes(profile.role)) {
-    return children // Allow login page to render
+  
+  // Show navigation if user is authenticated
+  if (user) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <AdminNavigation user={user} />
+        <main className="lg:pl-64 pt-16 lg:pt-0">
+          <div className="p-0">
+            {children}
+          </div>
+        </main>
+      </div>
+    )
   }
   
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <AdminNavigation user={profile} />
-      <main className="lg:pl-64 pt-16 lg:pt-0">
-        <div className="p-0">
-          {children}
-        </div>
-      </main>
-    </div>
-  )
+  // Show children without navigation if not authenticated
+  return children
 }
