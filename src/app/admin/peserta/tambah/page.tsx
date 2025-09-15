@@ -96,7 +96,7 @@ export default function TambahPeserta() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     <Mail className="w-4 h-4 inline mr-1" />
-                    Email *
+                    Email
                   </label>
                   <Input
                     type="email"
@@ -104,7 +104,6 @@ export default function TambahPeserta() {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="ahmad.wijaya@sman1jakarta.sch.id"
-                    required
                   />
                 </div>
 
@@ -127,7 +126,7 @@ export default function TambahPeserta() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     <Briefcase className="w-4 h-4 inline mr-1" />
-                    Jabatan
+                    Dapuan
                   </label>
                   <Input
                     name="jabatan"
@@ -140,7 +139,7 @@ export default function TambahPeserta() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     <Building className="w-4 h-4 inline mr-1" />
-                    Instansi
+                    Bidang
                   </label>
                   <Input
                     name="instansi"
@@ -152,13 +151,14 @@ export default function TambahPeserta() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Role/Peran
+                    Role/Peran *
                   </label>
                   <select
                     name="role"
                     value={formData.role}
                     onChange={handleChange}
                     className="w-full p-3 border border-gray-300 rounded-md"
+                    required
                   >
                     <option value="peserta">Peserta</option>
                     <option value="sekretaris_ppg">Sekretaris PPG</option>
