@@ -1,0 +1,142 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Users, Eye, EyeOff, ArrowLeft } from 'lucide-react'
+import { toast } from 'sonner'
+
+export default function AdminLoginPage() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password, type: 'admin' }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast.success('Login berhasil!')
+        router.push('/admin')
+      } else {
+        toast.error(data.error || 'Login gagal')
+      }
+    } catch (error) {
+      toast.error('Terjadi kesalahan sistem')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Back to Home */}
+        <div className="mb-6">
+          <Link href="/" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
+            <ArrowLeft className="w-4 h-4 mr-1" />
+            Kembali ke Beranda
+          </Link>
+        </div>
+
+        <Card className="shadow-lg">
+          <CardHeader className="text-center">
+            <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Users className="w-8 h-8 text-white" />
+            </div>
+            <CardTitle className="text-2xl font-bold">Login Admin</CardTitle>
+            <CardDescription>
+              Masuk ke sistem manajemen musyawarah PPG
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="email" className="text-sm font-medium text-gray-700">
+                  Email
+                </label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="admin@ppg.kemendikbud.go.id"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="password" className="text-sm font-medium text-gray-700">
+                  Password
+                </label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Masukkan password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="w-full pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={isLoading}
+              >
+                {isLoading ? 'Memproses...' : 'Masuk'}
+              </Button>
+            </form>
+
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-600">
+                Bukan admin?{' '}
+                <Link href="/peserta/login" className="text-blue-600 hover:underline">
+                  Login sebagai Peserta
+                </Link>
+              </p>
+            </div>
+
+            {/* Demo Credentials */}
+            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+              <h4 className="text-sm font-medium text-gray-700 mb-2">Demo Credentials:</h4>
+              <div className="text-xs text-gray-600 space-y-1">
+                <p><strong>Super Admin:</strong> budi.setiawan@ppg.kemendikbud.go.id</p>
+                <p><strong>Admin:</strong> siti.nurhaliza@ppg.kemendikbud.go.id</p>
+                <p><strong>Sekretaris:</strong> maya.sari@ppg.kemendikbud.go.id</p>
+                <p><strong>Password:</strong> password123</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}
