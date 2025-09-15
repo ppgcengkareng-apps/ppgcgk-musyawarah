@@ -70,9 +70,12 @@ function CreateNotulensiForm() {
 
   const fetchSessions = async () => {
     try {
-      const { data } = await supabase
+      const client = createClient()
+      if (!client) return
+      
+      const { data } = await client
         .from('sesi_musyawarah')
-        .select('id, judul, tanggal')
+        .select('id, nama_sesi, tanggal')
         .order('tanggal', { ascending: false })
       
       setSessions(data || [])
@@ -152,7 +155,7 @@ function CreateNotulensiForm() {
                   <option value="">Pilih sesi musyawarah...</option>
                   {sessions.map((sesi: any) => (
                     <option key={sesi.id} value={sesi.id}>
-                      {sesi.judul} - {new Date(sesi.tanggal).toLocaleDateString('id-ID')}
+                      {sesi.nama_sesi} - {new Date(sesi.tanggal).toLocaleDateString('id-ID')}
                     </option>
                   ))}
                 </select>
