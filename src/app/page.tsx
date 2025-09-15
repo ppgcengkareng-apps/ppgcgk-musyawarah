@@ -23,7 +23,7 @@ export default function HomePage() {
               <Link href="/admin/login">
                 <Button variant="outline">Login Admin</Button>
               </Link>
-              <Link href="/peserta/login">
+              <Link href="/admin/login">
                 <Button>Login Peserta</Button>
               </Link>
             </div>
@@ -115,7 +115,7 @@ export default function HomePage() {
                 Login sebagai Admin
               </Button>
             </Link>
-            <Link href="/peserta/login">
+            <Link href="/admin/login">
               <Button size="lg" variant="outline" className="w-full sm:w-auto">
                 <FileText className="w-5 h-5 mr-2" />
                 Login sebagai Peserta
