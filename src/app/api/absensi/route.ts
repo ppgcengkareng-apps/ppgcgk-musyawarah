@@ -45,9 +45,10 @@ export async function POST(request: NextRequest) {
 
     // Check if attendance is within allowed time window
     const now = new Date()
-    const sessionDate = new Date(session.tanggal)
-    const [startHour, startMinute] = session.waktu_mulai.split(':').map(Number)
-    const [endHour, endMinute] = session.waktu_selesai.split(':').map(Number)
+    const sessionData = session as any
+    const sessionDate = new Date(sessionData.tanggal)
+    const [startHour, startMinute] = sessionData.waktu_mulai.split(':').map(Number)
+    const [endHour, endMinute] = sessionData.waktu_selesai.split(':').map(Number)
     
     const sessionStart = new Date(sessionDate)
     sessionStart.setHours(startHour, startMinute, 0, 0)
@@ -55,8 +56,8 @@ export async function POST(request: NextRequest) {
     const sessionEnd = new Date(sessionDate)
     sessionEnd.setHours(endHour, endMinute, 0, 0)
 
-    const attendanceStart = new Date(sessionStart.getTime() + (session.batas_absen_mulai * 60000))
-    const attendanceEnd = new Date(sessionEnd.getTime() + (session.batas_absen_selesai * 60000))
+    const attendanceStart = new Date(sessionStart.getTime() + ((sessionData.batas_absen_mulai || 30) * 60000))
+    const attendanceEnd = new Date(sessionEnd.getTime() + ((sessionData.batas_absen_selesai || 15) * 60000))
 
     if (now < attendanceStart || now > attendanceEnd) {
       return NextResponse.json(
