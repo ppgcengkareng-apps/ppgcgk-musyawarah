@@ -9,6 +9,9 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatDate(date: Date | string, formatStr: string = "dd/MM/yyyy"): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date
+  if (isNaN(dateObj.getTime())) {
+    return 'Invalid Date'
+  }
   return format(dateObj, formatStr, { locale: id })
 }
 
@@ -18,10 +21,16 @@ export function formatTime(time: string): string {
 
 export function formatDateTime(date: Date | string): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date
+  if (isNaN(dateObj.getTime())) {
+    return 'Invalid Date'
+  }
   return format(dateObj, "dd/MM/yyyy HH:mm", { locale: id }) + " WIB"
 }
 
 export function generateShortLink(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID().substring(0, 8).toUpperCase()
+  }
   return Math.random().toString(36).substring(2, 8).toUpperCase()
 }
 

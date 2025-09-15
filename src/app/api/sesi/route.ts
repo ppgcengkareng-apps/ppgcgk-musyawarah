@@ -94,7 +94,13 @@ export async function POST(request: NextRequest) {
       batas_absen_selesai: 15
     }
 
-    console.log('Insert data:', insertData)
+    // Sanitize log data to prevent log injection
+    const sanitizedData = {
+      ...insertData,
+      nama_sesi: insertData.nama_sesi?.replace(/[\r\n]/g, ' '),
+      deskripsi: insertData.deskripsi?.replace(/[\r\n]/g, ' ')
+    }
+    console.log('Insert data:', sanitizedData)
 
     const { data: session, error } = await supabase
       .from('sesi_musyawarah')

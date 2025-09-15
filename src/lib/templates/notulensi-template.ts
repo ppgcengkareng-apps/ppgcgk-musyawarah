@@ -86,7 +86,7 @@ export const NOTULENSI_TEMPLATE = `
 <p><strong>Status:</strong> [STATUS]</p>
 `;
 
-export function generateNotulensitTemplate(
+export function generateNotulensiTemplate(
   session: any, 
   attendanceCount: number, 
   totalParticipants: number,

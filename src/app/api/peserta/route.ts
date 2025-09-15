@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
         jabatan,
         instansi,
         role: role || 'peserta',
-        password_hash: 'password123',
+        password_hash: process.env.DEFAULT_PASSWORD || 'password123',
         aktif: true
       })
       .select()

@@ -73,7 +73,9 @@ export async function PUT(
       .single()
 
     if (error) {
-      console.error('Supabase error:', error)
+      // Sanitize error message to prevent log injection
+      const sanitizedError = error.message?.replace(/[\r\n]/g, ' ') || 'Unknown error'
+      console.error('Supabase error:', sanitizedError)
       return NextResponse.json(
         { error: `Database error: ${error.message}` },
         { status: 500 }
