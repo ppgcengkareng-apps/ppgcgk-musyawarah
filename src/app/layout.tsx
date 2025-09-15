@@ -10,7 +10,6 @@ export const metadata: Metadata = {
   description: 'Sistem Manajemen Musyawarah PPG dengan Notulensi dan Absensi',
   keywords: 'PPG, musyawarah, notulensi, absensi, pendidikan',
   authors: [{ name: 'PPG Indonesia' }],
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
   themeColor: '#3b82f6',
   manifest: '/manifest.json',
 }

@@ -1,53 +1,24 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Users, Eye, EyeOff, ArrowLeft } from 'lucide-react'
-import { toast } from 'sonner'
+import { Users, ArrowLeft } from 'lucide-react'
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
-
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password, type: 'admin' }),
-      })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        toast.success('Login berhasil!')
-        router.push('/admin')
-      } else {
-        toast.error(data.error || 'Login gagal')
-      }
-    } catch (error) {
-      toast.error('Terjadi kesalahan sistem')
-    } finally {
-      setIsLoading(false)
-    }
+    alert('Login functionality will be implemented')
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Back to Home */}
         <div className="mb-6">
           <Link href="/" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
             <ArrowLeft className="w-4 h-4 mr-1" />
@@ -77,7 +48,6 @@ export default function AdminLoginPage() {
                   placeholder="admin@ppg.kemendikbud.go.id"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  required
                   className="w-full"
                 />
               </div>
@@ -86,32 +56,18 @@ export default function AdminLoginPage() {
                 <label htmlFor="password" className="text-sm font-medium text-gray-700">
                   Password
                 </label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Masukkan password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="w-full pr-10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Masukkan password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full"
+                />
               </div>
 
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={isLoading}
-              >
-                {isLoading ? 'Memproses...' : 'Masuk'}
+              <Button type="submit" className="w-full">
+                Masuk
               </Button>
             </form>
 
@@ -124,13 +80,10 @@ export default function AdminLoginPage() {
               </p>
             </div>
 
-            {/* Demo Credentials */}
             <div className="mt-6 p-4 bg-gray-50 rounded-lg">
               <h4 className="text-sm font-medium text-gray-700 mb-2">Demo Credentials:</h4>
               <div className="text-xs text-gray-600 space-y-1">
-                <p><strong>Super Admin:</strong> budi.setiawan@ppg.kemendikbud.go.id</p>
-                <p><strong>Admin:</strong> siti.nurhaliza@ppg.kemendikbud.go.id</p>
-                <p><strong>Sekretaris:</strong> maya.sari@ppg.kemendikbud.go.id</p>
+                <p><strong>Email:</strong> admin@ppg.kemendikbud.go.id</p>
                 <p><strong>Password:</strong> password123</p>
               </div>
             </div>

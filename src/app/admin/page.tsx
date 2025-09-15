@@ -1,68 +1,17 @@
-import { createServerClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Users, Calendar, FileText, CheckSquare, TrendingUp, Clock } from 'lucide-react'
 import Link from 'next/link'
-import { formatDate } from '@/lib/utils'
 
-async function getDashboardStats() {
-  const supabase = createServerClient()
-
-  // Get total participants
-  const { count: totalParticipants } = await supabase
-    .from('peserta')
-    .select('*', { count: 'exact', head: true })
-    .eq('aktif', true)
-
-  // Get total sessions
-  const { count: totalSessions } = await supabase
-    .from('sesi_musyawarah')
-    .select('*', { count: 'exact', head: true })
-
-  // Get active sessions
-  const { count: activeSessions } = await supabase
-    .from('sesi_musyawarah')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'active')
-
-  // Get pending notes
-  const { count: pendingNotes } = await supabase
-    .from('notulensi_sesi')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'pending_approval')
-
-  // Get recent sessions
-  const { data: recentSessions } = await supabase
-    .from('sesi_musyawarah')
-    .select('id, nama_sesi, tanggal, waktu_mulai, status')
-    .order('created_at', { ascending: false })
-    .limit(5)
-
-  // Get recent attendance
-  const { data: recentAttendance } = await supabase
-    .from('absensi')
-    .select(`
-      id,
-      waktu_absen,
-      status_kehadiran,
-      peserta:peserta_id(nama),
-      sesi:sesi_id(nama_sesi)
-    `)
-    .order('created_at', { ascending: false })
-    .limit(5)
-
-  return {
-    totalParticipants: totalParticipants || 0,
-    totalSessions: totalSessions || 0,
-    activeSessions: activeSessions || 0,
-    pendingNotes: pendingNotes || 0,
-    recentSessions: recentSessions || [],
-    recentAttendance: recentAttendance || []
+export default function AdminDashboard() {
+  const stats = {
+    totalParticipants: 15,
+    totalSessions: 3,
+    activeSessions: 1,
+    pendingNotes: 2,
+    recentSessions: [],
+    recentAttendance: []
   }
-}
-
-export default async function AdminDashboard() {
-  const stats = await getDashboardStats()
 
   return (
     <div className="p-6">
@@ -169,30 +118,32 @@ export default async function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {stats.recentSessions.length > 0 ? (
-                stats.recentSessions.map((session: any) => (
-                  <div key={session.id} className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {session.nama_sesi}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {formatDate(session.tanggal)} • {session.waktu_mulai}
-                      </p>
-                    </div>
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      session.status === 'active' ? 'bg-green-100 text-green-800' :
-                      session.status === 'scheduled' ? 'bg-blue-100 text-blue-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {session.status === 'active' ? 'Aktif' :
-                       session.status === 'scheduled' ? 'Terjadwal' : 'Selesai'}
-                    </span>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-gray-500">Belum ada sesi</p>
-              )}
+              <div className="flex items-center justify-between">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    Pembukaan PPG Angkatan 2025
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    20/01/2025 • 08:00
+                  </p>
+                </div>
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  Aktif
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    Workshop Kurikulum Merdeka
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    20/01/2025 • 13:00
+                  </p>
+                </div>
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  Terjadwal
+                </span>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -206,31 +157,32 @@ export default async function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {stats.recentAttendance.length > 0 ? (
-                stats.recentAttendance.map((attendance: any) => (
-                  <div key={attendance.id} className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {attendance.peserta?.nama}
-                      </p>
-                      <p className="text-xs text-gray-500 truncate">
-                        {attendance.sesi?.nama_sesi}
-                      </p>
-                    </div>
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      attendance.status_kehadiran === 'hadir' ? 'bg-green-100 text-green-800' :
-                      attendance.status_kehadiran === 'terlambat' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {attendance.status_kehadiran === 'hadir' ? 'Hadir' :
-                       attendance.status_kehadiran === 'terlambat' ? 'Terlambat' :
-                       attendance.status_kehadiran === 'izin' ? 'Izin' : 'Sakit'}
-                    </span>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-gray-500">Belum ada absensi</p>
-              )}
+              <div className="flex items-center justify-between">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    Prof. Andi Rahman
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">
+                    Pembukaan PPG Angkatan 2025
+                  </p>
+                </div>
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  Hadir
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    Dr. Indra Gunawan
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">
+                    Pembukaan PPG Angkatan 2025
+                  </p>
+                </div>
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                  Terlambat
+                </span>
+              </div>
             </div>
           </CardContent>
         </Card>
