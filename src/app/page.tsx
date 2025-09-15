@@ -15,8 +15,8 @@ export default function HomePage() {
                 <Users className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">Sistem Musyawarah PPG</h1>
-                <p className="text-sm text-gray-600">Penggerak Pembina Generasi</p>
+                <h1 className="text-xl font-bold text-gray-900">Notulen Musyawarah PPG</h1>
+                <p className="text-sm text-gray-600">Penggerak Pembina Generus</p>
               </div>
             </div>
             <div className="flex space-x-2">
@@ -35,7 +35,7 @@ export default function HomePage() {
       <main className="container mx-auto px-4 py-12">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            Selamat Datang di Sistem Musyawarah PPG
+            Selamat Datang di Notulen Musyawarah PPG
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Platform terintegrasi untuk mengelola musyawarah, absensi, dan notulensi 
