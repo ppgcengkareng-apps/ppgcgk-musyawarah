@@ -9,16 +9,20 @@ export async function POST(request: NextRequest) {
     const { data: { session } } = await supabase.auth.getSession()
 
     if (session) {
-      // Log activity before logout
-      await supabase
-        .from('log_aktivitas')
-        .insert({
-          peserta_id: session.user.id,
-          aktivitas: 'logout',
-          detail: { ip: request.ip },
-          ip_address: request.ip,
-          user_agent: request.headers.get('user-agent')
-        })
+      // Log activity before logout (optional)
+      try {
+        await (supabase as any)
+          .from('log_aktivitas')
+          .insert({
+            peserta_id: session.user.id,
+            aktivitas: 'logout',
+            detail: { ip: request.ip },
+            ip_address: request.ip,
+            user_agent: request.headers.get('user-agent')
+          })
+      } catch (logError) {
+        console.log('Log activity failed:', logError)
+      }
 
       // Sign out
       await supabase.auth.signOut()
