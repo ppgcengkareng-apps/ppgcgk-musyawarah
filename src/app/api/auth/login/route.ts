@@ -47,15 +47,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Type assertion for user data
+    const userData = user as any
+    
     // Debug: Log password comparison
     console.log('Password comparison:', { 
       input: password, 
-      stored: user.password_hash, 
-      match: password === user.password_hash 
+      stored: userData.password_hash, 
+      match: password === userData.password_hash 
     })
 
     // Simple password comparison - no hashing
-    if (password !== user.password_hash) {
+    if (password !== userData.password_hash) {
       return NextResponse.json(
         { error: 'Password salah' },
         { status: 401 }
@@ -63,7 +66,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check admin role
-    if (!['admin', 'super_admin', 'sekretaris_ppg'].includes(user.role)) {
+    if (!['admin', 'super_admin', 'sekretaris_ppg'].includes(userData.role)) {
       return NextResponse.json(
         { error: 'Akses ditolak. Anda bukan admin.' },
         { status: 403 }
@@ -72,26 +75,26 @@ export async function POST(request: NextRequest) {
 
     // Create Supabase auth session
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email: user.email,
+      email: userData.email,
       password: password
     })
 
     if (authError) {
       // If auth fails, try to sign up first then sign in
       const { error: signUpError } = await supabase.auth.signUp({
-        email: user.email,
+        email: userData.email,
         password: password,
         options: {
           data: {
-            nama: user.nama,
-            role: user.role
+            nama: userData.nama,
+            role: userData.role
           }
         }
       })
       
       if (!signUpError) {
         const { data: authData2, error: authError2 } = await supabase.auth.signInWithPassword({
-          email: user.email,
+          email: userData.email,
           password: password
         })
         
@@ -105,15 +108,15 @@ export async function POST(request: NextRequest) {
     await supabase
       .from('peserta')
       .update({ last_login: new Date().toISOString() })
-      .eq('id', user.id)
+      .eq('id', userData.id)
 
     return NextResponse.json({
       success: true,
       user: {
-        id: user.id,
-        nama: user.nama,
-        email: user.email,
-        role: user.role
+        id: userData.id,
+        nama: userData.nama,
+        email: userData.email,
+        role: userData.role
       }
     })
 
