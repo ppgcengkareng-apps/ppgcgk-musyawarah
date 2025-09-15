@@ -21,11 +21,11 @@ interface RecentSession {
 }
 
 interface RecentAttendance {
-  id: string
-  status_kehadiran: string
-  created_at: string
-  peserta: { nama: string } | null
-  sesi: { judul: string } | null
+  id: any
+  status_kehadiran: any
+  created_at: any
+  peserta: any
+  sesi: any
 }
 
 export default function AdminDashboard() {
