@@ -22,7 +22,7 @@ export default function ParticipantManagement() {
   const [searchTerm, setSearchTerm] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [editingParticipant, setEditingParticipant] = useState<Participant | null>(null)
-  const [editForm, setEditForm] = useState({ nama: '', jabatan: '', instansi: '' })
+  const [editForm, setEditForm] = useState({ nama: '', jabatan: '', instansi: '', role: '', password: '' })
 
   useEffect(() => {
     fetchParticipants()
@@ -92,21 +92,23 @@ export default function ParticipantManagement() {
     setEditForm({
       nama: participant.nama,
       jabatan: participant.jabatan,
-      instansi: participant.instansi
+      instansi: participant.instansi,
+      role: participant.role,
+      password: ''
     })
   }
 
   const handleSaveEdit = async () => {
-    if (editingParticipant && editForm.nama && editForm.jabatan && editForm.instansi) {
+    if (editingParticipant && editForm.nama && editForm.jabatan && editForm.instansi && editForm.role) {
       await updateParticipant(editingParticipant.id, editForm)
       setEditingParticipant(null)
-      setEditForm({ nama: '', jabatan: '', instansi: '' })
+      setEditForm({ nama: '', jabatan: '', instansi: '', role: '', password: '' })
     }
   }
 
   const handleCancelEdit = () => {
     setEditingParticipant(null)
-    setEditForm({ nama: '', jabatan: '', instansi: '' })
+    setEditForm({ nama: '', jabatan: '', instansi: '', role: '', password: '' })
   }
 
   const updateParticipant = async (id: string, data: any) => {
@@ -286,6 +288,30 @@ export default function ParticipantManagement() {
                   value={editForm.instansi}
                   onChange={(e) => setEditForm({...editForm, instansi: e.target.value})}
                   placeholder="Masukkan instansi"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Role</label>
+                <select
+                  value={editForm.role}
+                  onChange={(e) => setEditForm({...editForm, role: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="peserta">Peserta</option>
+                  <option value="sekretaris_ppg">Sekretaris PPG</option>
+                  <option value="admin">Admin</option>
+                  <option value="super_admin">Super Admin</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Password Baru</label>
+                <Input
+                  type="password"
+                  value={editForm.password}
+                  onChange={(e) => setEditForm({...editForm, password: e.target.value})}
+                  placeholder="Kosongkan jika tidak ingin mengubah password"
                 />
               </div>
             </div>

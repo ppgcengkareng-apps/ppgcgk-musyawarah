@@ -79,7 +79,7 @@ export async function PUT(request: NextRequest) {
   try {
     const url = new URL(request.url)
     const id = url.searchParams.get('id')
-    const { nama, jabatan, instansi } = await request.json()
+    const { nama, jabatan, instansi, role, password } = await request.json()
     
     if (!id) {
       return NextResponse.json({ error: 'ID peserta diperlukan' }, { status: 400 })
@@ -87,9 +87,17 @@ export async function PUT(request: NextRequest) {
 
     const supabase = createServerClient()
 
+    // Prepare update data
+    const updateData: any = { nama, jabatan, instansi, role }
+    
+    // Only update password if provided
+    if (password && password.trim() !== '') {
+      updateData.password_hash = password
+    }
+
     const { data, error } = await supabase
       .from('peserta')
-      .update({ nama, jabatan, instansi })
+      .update(updateData)
       .eq('id', id)
       .select()
 
