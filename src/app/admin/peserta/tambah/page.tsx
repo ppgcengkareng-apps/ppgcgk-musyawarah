@@ -88,7 +88,7 @@ export default function TambahPeserta() {
                     name="nama"
                     value={formData.nama}
                     onChange={handleChange}
-                    placeholder="Contoh: Dr. Ahmad Wijaya, M.Pd"
+                    placeholder="Nama Lengkap"
                     required
                   />
                 </div>
@@ -103,7 +103,7 @@ export default function TambahPeserta() {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    placeholder="ahmad.wijaya@sman1jakarta.sch.id"
+                    placeholder="Dikosongkan tidak apa"
                   />
                 </div>
 
@@ -132,20 +132,20 @@ export default function TambahPeserta() {
                     name="jabatan"
                     value={formData.jabatan}
                     onChange={handleChange}
-                    placeholder="Contoh: Kepala Sekolah, Guru Senior, Wakil Kepala"
+                    placeholder="Pengurus Harian PPG, Bid. Kurikulum, dll"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     <Building className="w-4 h-4 inline mr-1" />
-                    Bidang
+                    Desa - Kelompok
                   </label>
                   <Input
                     name="instansi"
                     value={formData.instansi}
                     onChange={handleChange}
-                    placeholder="Contoh: SMA Negeri 1 Jakarta"
+                    placeholder="Nama Desa - Nama Kelompok"
                   />
                 </div>
 
