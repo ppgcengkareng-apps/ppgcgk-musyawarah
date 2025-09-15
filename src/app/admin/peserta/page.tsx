@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus, Search, Edit, Trash2 } from 'lucide-react'
+import { Plus, Search, Edit, Trash2, X } from 'lucide-react'
 import Link from 'next/link'
 
 interface Participant {
@@ -21,6 +21,8 @@ export default function ParticipantManagement() {
   const [participants, setParticipants] = useState<Participant[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const [editingParticipant, setEditingParticipant] = useState<Participant | null>(null)
+  const [editForm, setEditForm] = useState({ nama: '', jabatan: '', instansi: '' })
 
   useEffect(() => {
     fetchParticipants()
@@ -86,18 +88,25 @@ export default function ParticipantManagement() {
   }
 
   const handleEdit = (participant: Participant) => {
-    // Simple edit with prompt for now
-    const newNama = prompt('Edit Nama:', participant.nama)
-    const newJabatan = prompt('Edit Jabatan:', participant.jabatan)
-    const newInstansi = prompt('Edit Instansi:', participant.instansi)
-    
-    if (newNama && newJabatan && newInstansi) {
-      updateParticipant(participant.id, {
-        nama: newNama,
-        jabatan: newJabatan,
-        instansi: newInstansi
-      })
+    setEditingParticipant(participant)
+    setEditForm({
+      nama: participant.nama,
+      jabatan: participant.jabatan,
+      instansi: participant.instansi
+    })
+  }
+
+  const handleSaveEdit = async () => {
+    if (editingParticipant && editForm.nama && editForm.jabatan && editForm.instansi) {
+      await updateParticipant(editingParticipant.id, editForm)
+      setEditingParticipant(null)
+      setEditForm({ nama: '', jabatan: '', instansi: '' })
     }
+  }
+
+  const handleCancelEdit = () => {
+    setEditingParticipant(null)
+    setEditForm({ nama: '', jabatan: '', instansi: '' })
   }
 
   const updateParticipant = async (id: string, data: any) => {
@@ -240,6 +249,58 @@ export default function ParticipantManagement() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Edit Modal */}
+      {editingParticipant && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Edit Peserta</h3>
+              <Button variant="ghost" size="sm" onClick={handleCancelEdit}>
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Nama</label>
+                <Input
+                  value={editForm.nama}
+                  onChange={(e) => setEditForm({...editForm, nama: e.target.value})}
+                  placeholder="Masukkan nama"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Jabatan</label>
+                <Input
+                  value={editForm.jabatan}
+                  onChange={(e) => setEditForm({...editForm, jabatan: e.target.value})}
+                  placeholder="Masukkan jabatan"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Instansi</label>
+                <Input
+                  value={editForm.instansi}
+                  onChange={(e) => setEditForm({...editForm, instansi: e.target.value})}
+                  placeholder="Masukkan instansi"
+                />
+              </div>
+            </div>
+            
+            <div className="flex space-x-2 mt-6">
+              <Button onClick={handleSaveEdit} className="flex-1">
+                Simpan
+              </Button>
+              <Button variant="outline" onClick={handleCancelEdit} className="flex-1">
+                Batal
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
