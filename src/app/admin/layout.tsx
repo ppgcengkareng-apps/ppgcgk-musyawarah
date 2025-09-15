@@ -10,8 +10,10 @@ export default function AdminLayout({
   return (
     <div className="min-h-screen bg-gray-50">
       <AdminNavigation user={user} />
-      <main className="lg:pl-64">
-        {children}
+      <main className="lg:pl-64 pt-16 lg:pt-0">
+        <div className="p-0">
+          {children}
+        </div>
       </main>
     </div>
   )
