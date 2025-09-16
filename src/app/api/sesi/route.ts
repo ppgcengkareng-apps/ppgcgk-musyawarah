@@ -53,11 +53,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Ultra-minimal insert - only absolutely required fields
+    // Extremely minimal insert with very short values
     const { data: session, error: sessionError } = await (supabase as any)
       .from('sesi_musyawarah')
       .insert({
-        nama_sesi: nama_sesi?.substring(0, 50) || 'Sesi Baru',
+        nama_sesi: nama_sesi?.substring(0, 8) || 'Sesi',
         tanggal: tanggal || new Date().toISOString().split('T')[0]
       })
       .select()
