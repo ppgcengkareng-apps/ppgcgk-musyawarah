@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
 
     const { data: participants, error } = await supabase
       .from('peserta')
-      .select('id, nama, email, nomor_hp, jabatan, instansi, role, aktif, created_at')
+      .select('id, nama, username, nomor_hp, jabatan, instansi, role, aktif, created_at')
       .order('nama')
 
     if (error) {
@@ -31,11 +31,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { nama, email, nomor_hp, jabatan, instansi, role } = body
+    const { nama, username, nomor_hp, jabatan, instansi, role } = body
 
-    if (!nama || !email) {
+    if (!nama || !username) {
       return NextResponse.json(
-        { error: 'Nama dan email harus diisi' },
+        { error: 'Nama dan username harus diisi' },
         { status: 400 }
       )
     }
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       .from('peserta')
       .insert({
         nama,
-        email,
+        username,
         nomor_hp,
         jabatan,
         instansi,

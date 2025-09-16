@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowLeft, User, Mail, Phone, Briefcase, Building } from 'lucide-react'
+import { ArrowLeft, User, UserCheck, Phone, Briefcase, Building } from 'lucide-react'
 import Link from 'next/link'
 
 export default function TambahPeserta() {
@@ -13,7 +13,7 @@ export default function TambahPeserta() {
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     nama: '',
-    email: '',
+    username: '',
     nomor_hp: '',
     jabatan: '',
     instansi: '',
@@ -95,15 +95,14 @@ export default function TambahPeserta() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <Mail className="w-4 h-4 inline mr-1" />
-                    Email
+                    <UserCheck className="w-4 h-4 inline mr-1" />
+                    Username
                   </label>
                   <Input
-                    type="email"
-                    name="email"
-                    value={formData.email}
+                    name="username"
+                    value={formData.username}
                     onChange={handleChange}
-                    placeholder="Dikosongkan tidak apa"
+                    placeholder="Username untuk login"
                   />
                 </div>
 
@@ -175,7 +174,7 @@ export default function TambahPeserta() {
                   Password default untuk peserta baru adalah: <strong>password123</strong>
                 </p>
                 <p className="text-xs text-blue-600 mt-1">
-                  Peserta dapat login menggunakan email dan password default ini.
+                  Peserta dapat login menggunakan username dan password default ini.
                 </p>
               </div>
 
