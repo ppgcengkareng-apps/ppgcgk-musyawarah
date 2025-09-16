@@ -10,6 +10,13 @@ export async function GET(request: NextRequest) {
       .select('id, nama, email, nomor_hp, jabatan, instansi, role, aktif, created_at')
       .order('nama')
 
+    // Transform data to match expected format
+    const transformedParticipants = participants?.map(p => ({
+      ...p,
+      username: p.email, // Map email to username
+      bidang: p.instansi  // Map instansi to bidang
+    })) || []
+
     if (error) {
       return NextResponse.json(
         { error: 'Gagal memuat data peserta' },
@@ -17,7 +24,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    return NextResponse.json(participants || [])
+    return NextResponse.json(transformedParticipants)
 
   } catch (error) {
     console.error('Get participants error:', error)
