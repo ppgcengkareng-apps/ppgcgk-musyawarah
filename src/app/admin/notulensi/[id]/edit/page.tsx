@@ -110,7 +110,7 @@ export default function EditNotulensiPage() {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => router.back()}
+          onClick={() => router.push('/admin/notulensi')}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Kembali
@@ -200,7 +200,7 @@ export default function EditNotulensiPage() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.back()}
+            onClick={() => router.push(`/admin/notulensi/${params.id}`)}
           >
             Batal
           </Button>

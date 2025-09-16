@@ -148,7 +148,7 @@ export default function ViewNotulensiPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => router.back()}
+            onClick={() => router.push('/admin/notulensi')}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Kembali
