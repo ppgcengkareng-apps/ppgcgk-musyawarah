@@ -55,7 +55,7 @@ export async function PUT(
       )
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('notulensi_sesi')
       .update({
         judul: body.judul,
@@ -97,7 +97,7 @@ export async function DELETE(
     const supabase = createServerClient()
     const { id } = params
 
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('notulensi_sesi')
       .delete()
       .eq('id', id)
