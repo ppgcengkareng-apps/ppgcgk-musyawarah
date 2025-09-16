@@ -14,6 +14,7 @@ import {
   PieChart,
   Activity
 } from 'lucide-react'
+import { exportToExcel, exportToPDF } from '@/lib/export'
 
 export default function LaporanManagement() {
   const [stats, setStats] = useState({
@@ -32,15 +33,11 @@ export default function LaporanManagement() {
 
   const fetchReportData = async () => {
     try {
-      // Simulate API calls for report data
-      setStats({
-        totalParticipants: 15,
-        totalSessions: 3,
-        totalAttendance: 42,
-        totalNotes: 2,
-        attendanceRate: 85,
-        approvalRate: 100
-      })
+      const response = await fetch('/api/laporan?type=overview')
+      if (response.ok) {
+        const data = await response.json()
+        setStats(data)
+      }
     } catch (error) {
       console.error('Error fetching report data:', error)
     } finally {
@@ -48,12 +45,30 @@ export default function LaporanManagement() {
     }
   }
 
-  const handleExportExcel = (type: string) => {
-    alert(`Export ${type} ke Excel akan diimplementasikan`)
+  const handleExportExcel = async (type: string) => {
+    try {
+      const response = await fetch(`/api/laporan?type=${type}`)
+      if (response.ok) {
+        const data = await response.json()
+        exportToExcel(data, `laporan-${type}-${new Date().toISOString().split('T')[0]}`, `Laporan ${type}`)
+      }
+    } catch (error) {
+      console.error('Export Excel error:', error)
+      alert('Gagal export ke Excel')
+    }
   }
 
-  const handleExportPDF = (type: string) => {
-    alert(`Export ${type} ke PDF akan diimplementasikan`)
+  const handleExportPDF = async (type: string) => {
+    try {
+      const response = await fetch(`/api/laporan?type=${type}`)
+      if (response.ok) {
+        const data = await response.json()
+        await exportToPDF(data, `laporan-${type}-${new Date().toISOString().split('T')[0]}`, `Laporan ${type.toUpperCase()}`)
+      }
+    } catch (error) {
+      console.error('Export PDF error:', error)
+      alert('Gagal export ke PDF')
+    }
   }
 
   if (isLoading) {
