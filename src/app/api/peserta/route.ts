@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
 
     const { data: participants, error } = await supabase
       .from('peserta')
-      .select('id, nama, username, nomor_hp, jabatan, instansi, role, aktif, created_at')
+      .select('id, nama, email, nomor_hp, jabatan, instansi, role, aktif, created_at')
       .order('nama')
 
     if (error) {
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       .from('peserta')
       .insert({
         nama,
-        username,
+        email: username, // Simpan username ke kolom email
         nomor_hp,
         jabatan,
         instansi,

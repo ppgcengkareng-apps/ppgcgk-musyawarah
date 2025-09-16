@@ -5,7 +5,7 @@ export interface Database {
         Row: {
           id: string
           nama: string
-          username: string
+          email: string
           nomor_hp: string | null
           jabatan: string | null
           instansi: string | null
@@ -21,7 +21,7 @@ export interface Database {
         Insert: {
           id?: string
           nama: string
-          username: string
+          email: string
           nomor_hp?: string | null
           jabatan?: string | null
           instansi?: string | null
@@ -37,7 +37,7 @@ export interface Database {
         Update: {
           id?: string
           nama?: string
-          username?: string
+          email?: string
           nomor_hp?: string | null
           jabatan?: string | null
           instansi?: string | null

@@ -10,7 +10,7 @@ import Link from 'next/link'
 interface Participant {
   id: string
   nama: string
-  username: string
+  email: string
   jabatan: string
   instansi: string
   role: string
@@ -44,7 +44,7 @@ export default function ParticipantManagement() {
 
   const filteredParticipants = participants.filter(p =>
     p.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.instansi.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
@@ -202,7 +202,7 @@ export default function ParticipantManagement() {
                     <td className="py-3 px-4">
                       <div className="font-medium text-gray-900">{participant.nama}</div>
                     </td>
-                    <td className="py-3 px-4 text-gray-600">{participant.username}</td>
+                    <td className="py-3 px-4 text-gray-600">{participant.email}</td>
                     <td className="py-3 px-4 text-gray-600">{participant.jabatan}</td>
                     <td className="py-3 px-4 text-gray-600">{participant.instansi}</td>
                     <td className="py-3 px-4">
