@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
 
     const createdBy = (adminUser as any)?.id || '00000000-0000-0000-0000-000000000000'
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('notulensi_sesi')
       .insert({
         sesi_id: body.sesi_id,
