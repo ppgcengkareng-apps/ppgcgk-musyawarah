@@ -35,10 +35,7 @@ export default function EditSession() {
 
   useEffect(() => {
     if (sessionData) {
-      console.log('Setting form data from sessionData:', sessionData)
-      console.log('Deskripsi value:', sessionData.deskripsi)
-      console.log('Deskripsi type:', typeof sessionData.deskripsi)
-      console.log('Deskripsi length:', sessionData.deskripsi?.length)
+      // Debug logs removed - issue resolved
       
       setFormData({
         nama_sesi: sessionData.nama_sesi || '',
@@ -58,7 +55,7 @@ export default function EditSession() {
       const response = await fetch(`/api/sesi/${sessionId}`)
       if (response.ok) {
         const data = await response.json()
-        console.log('Session data received:', data) // Debug log
+        // Session data loaded successfully
         setSessionData(data)
       } else {
         console.error('Failed to fetch session:', response.status)

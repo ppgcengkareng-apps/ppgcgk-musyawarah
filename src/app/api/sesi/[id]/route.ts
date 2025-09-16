@@ -34,12 +34,7 @@ export async function GET(
       }
     }
 
-    console.log('Supabase query result:')
-    console.log('- Error:', error)
-    console.log('- Data:', session)
-    console.log('- Deskripsi raw:', (session as any)?.deskripsi)
-    console.log('- Deskripsi length:', (session as any)?.deskripsi?.length)
-    console.log('- Deskripsi type:', typeof (session as any)?.deskripsi)
+    // Debug logs removed - issue resolved
 
     if (error) {
       console.error('Database error:', error)
