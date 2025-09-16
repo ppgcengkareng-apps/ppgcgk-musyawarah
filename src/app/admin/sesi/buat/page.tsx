@@ -1,16 +1,25 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowLeft, Calendar, Clock, MapPin, Users } from 'lucide-react'
+import { ArrowLeft, Calendar, Clock, MapPin, Users, UserCheck } from 'lucide-react'
 import Link from 'next/link'
+
+interface Peserta {
+  id: string
+  nama: string
+  username: string
+  bidang: string
+}
 
 export default function CreateSession() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [participants, setParticipants] = useState<Peserta[]>([])
+  const [selectedParticipants, setSelectedParticipants] = useState<string[]>([])
   const [formData, setFormData] = useState({
     nama_sesi: '',
     deskripsi: '',
@@ -22,15 +31,57 @@ export default function CreateSession() {
     maksimal_peserta: 100
   })
 
+  useEffect(() => {
+    fetchParticipants()
+  }, [])
+
+  const fetchParticipants = async () => {
+    try {
+      const response = await fetch('/api/peserta')
+      if (response.ok) {
+        const data = await response.json()
+        const pesertaOnly = data.filter((p: any) => p.role === 'peserta')
+        setParticipants(pesertaOnly)
+      }
+    } catch (error) {
+      console.error('Error fetching participants:', error)
+    }
+  }
+
+  const handleParticipantToggle = (participantId: string) => {
+    setSelectedParticipants(prev => 
+      prev.includes(participantId)
+        ? prev.filter(id => id !== participantId)
+        : [...prev, participantId]
+    )
+  }
+
+  const selectAllParticipants = () => {
+    setSelectedParticipants(participants.map(p => p.id))
+  }
+
+  const clearAllParticipants = () => {
+    setSelectedParticipants([])
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+
+    if (selectedParticipants.length === 0) {
+      alert('Pilih minimal 1 peserta yang wajib hadir')
+      setIsLoading(false)
+      return
+    }
 
     try {
       const response = await fetch('/api/sesi', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          peserta_ids: selectedParticipants
+        })
       })
 
       if (response.ok) {
@@ -200,6 +251,64 @@ export default function CreateSession() {
                   min="1"
                   max="100"
                 />
+              </div>
+
+              {/* Participant Selection */}
+              <div>
+                <div className="flex justify-between items-center mb-3">
+                  <label className="block text-sm font-medium text-gray-700">
+                    <UserCheck className="w-4 h-4 inline mr-1" />
+                    Pilih Peserta Wajib Hadir * ({selectedParticipants.length} dipilih)
+                  </label>
+                  <div className="flex space-x-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={selectAllParticipants}
+                    >
+                      Pilih Semua
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={clearAllParticipants}
+                    >
+                      Hapus Semua
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="border border-gray-300 rounded-lg p-4 max-h-60 overflow-y-auto">
+                  {participants.length === 0 ? (
+                    <p className="text-gray-500 text-center py-4">Memuat data peserta...</p>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-2">
+                      {participants.map((participant) => (
+                        <label
+                          key={participant.id}
+                          className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedParticipants.includes(participant.id)}
+                            onChange={() => handleParticipantToggle(participant.id)}
+                            className="mr-3 h-4 w-4 text-blue-600"
+                          />
+                          <div className="flex-1">
+                            <p className="font-medium text-sm">{participant.nama}</p>
+                            <p className="text-xs text-gray-600">{participant.username} • {participant.bidang}</p>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                
+                {selectedParticipants.length === 0 && (
+                  <p className="text-red-600 text-sm mt-2">* Pilih minimal 1 peserta yang wajib hadir</p>
+                )}
               </div>
 
               {/* Submit */}
