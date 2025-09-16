@@ -53,20 +53,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create session
+    // Create session with data truncation for database limits
     const { data: session, error: sessionError } = await (supabase as any)
       .from('sesi_musyawarah')
       .insert({
-        nama_sesi,
-        deskripsi: deskripsi || null,
+        nama_sesi: nama_sesi?.substring(0, 255) || '',
+        deskripsi: deskripsi?.substring(0, 1000) || null,
         tanggal,
-        waktu_mulai,
-        waktu_selesai,
-        lokasi: lokasi || null,
-        tipe: tipe || 'offline',
+        waktu_mulai: waktu_mulai?.substring(0, 8) || '',
+        waktu_selesai: waktu_selesai?.substring(0, 8) || '',
+        lokasi: lokasi?.substring(0, 255) || null,
+        tipe: (tipe || 'offline').substring(0, 10),
         maksimal_peserta: maksimal_peserta || 100,
-        status: 'scheduled',
-        created_at: new Date().toISOString()
+        status: 'scheduled'
       })
       .select()
       .single()
