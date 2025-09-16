@@ -1,9 +1,0 @@
-Saya ingin membuat website yang akan saya upload website GitHub dan otomatis deploy di vercel, dan supabase sebagai database.
-Dengan Spesifikasi seperti ini:
-1. Me 
-
-
-DOKUMENTASI:
-PROJECT ID SUPABASE: ivmmvraxebyxyqckweiw
-ANON PUBLIC KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2bW12cmF4ZWJ5eHlxY2t3ZWl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5MTI2NTIsImV4cCI6MjA3MzQ4ODY1Mn0.NsEeqivsoGA-h5Ur81fWZCvdlC-zrUkD74PP2TyyFuo
-service_rolesecret: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2bW12cmF4ZWJ5eHlxY2t3ZWl3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NzkxMjY1MiwiZXhwIjoyMDczNDg4NjUyfQ.ID9S_0lxSspZPBsmZ9jrdATJTpjAm-dyrDm4mzYyuI4
