@@ -43,6 +43,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Skip time validation for testing - allow attendance anytime
+    // TODO: Re-enable time validation for production
+    
+    /*
     // Check if attendance is within allowed time window
     const now = new Date()
     const sessionData = session as any
@@ -56,7 +60,7 @@ export async function POST(request: NextRequest) {
     const sessionEnd = new Date(sessionDate)
     sessionEnd.setHours(endHour, endMinute, 0, 0)
 
-    const attendanceStart = new Date(sessionStart.getTime() + ((sessionData.batas_absen_mulai || 30) * 60000))
+    const attendanceStart = new Date(sessionStart.getTime() - ((sessionData.batas_absen_mulai || 30) * 60000))
     const attendanceEnd = new Date(sessionEnd.getTime() + ((sessionData.batas_absen_selesai || 15) * 60000))
 
     if (now < attendanceStart || now > attendanceEnd) {
@@ -65,12 +69,10 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+    */
 
-    // Determine attendance status based on time
+    // Use selected status directly for testing
     let finalStatus = status_kehadiran
-    if (status_kehadiran === 'hadir' && now > sessionStart) {
-      finalStatus = 'terlambat'
-    }
 
     // Insert attendance record
     const { data: attendance, error } = await (supabase as any)
