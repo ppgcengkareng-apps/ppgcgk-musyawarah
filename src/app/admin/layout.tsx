@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Head from 'next/head'
 import AdminNavigation from '@/components/admin/admin-navigation'
+import { ToastContainer } from '@/components/ui/toast'
+import { useToast } from '@/hooks/use-toast'
 
 export default function AdminLayout({
   children,
@@ -13,6 +15,7 @@ export default function AdminLayout({
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const pathname = usePathname()
+  const { toasts, removeToast } = useToast()
   
   useEffect(() => {
     // Prevent browser caching of admin pages
@@ -62,6 +65,7 @@ export default function AdminLayout({
               {children}
             </div>
           </main>
+          <ToastContainer toasts={toasts} onRemove={removeToast} />
         </div>
       </>
     )

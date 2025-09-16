@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Plus, Search, Edit, Trash2, X } from 'lucide-react'
+import { ToastContainer } from '@/components/ui/toast'
+import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 
 interface Participant {
@@ -23,6 +25,7 @@ export default function ParticipantManagement() {
   const [isLoading, setIsLoading] = useState(true)
   const [editingParticipant, setEditingParticipant] = useState<Participant | null>(null)
   const [editForm, setEditForm] = useState({ nama: '', jabatan: '', instansi: '', role: '', password: '' })
+  const { toasts, removeToast, toast } = useToast()
 
   useEffect(() => {
     fetchParticipants()
@@ -76,13 +79,13 @@ export default function ParticipantManagement() {
         })
         
         if (response.ok) {
-          alert('Peserta berhasil dihapus')
+          toast.success('Peserta berhasil dihapus')
           fetchParticipants() // Refresh data
         } else {
-          alert('Gagal menghapus peserta')
+          toast.error('Gagal menghapus peserta')
         }
       } catch (error) {
-        alert('Terjadi kesalahan sistem')
+        toast.error('Terjadi kesalahan sistem')
       }
     }
   }
@@ -120,13 +123,13 @@ export default function ParticipantManagement() {
       })
       
       if (response.ok) {
-        alert('Peserta berhasil diupdate')
+        toast.success('Peserta berhasil diupdate')
         fetchParticipants() // Refresh data
       } else {
-        alert('Gagal mengupdate peserta')
+        toast.error('Gagal mengupdate peserta')
       }
     } catch (error) {
-      alert('Terjadi kesalahan sistem')
+      toast.error('Terjadi kesalahan sistem')
     }
   }
 
@@ -327,6 +330,7 @@ export default function ParticipantManagement() {
           </div>
         </div>
       )}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   )
 }

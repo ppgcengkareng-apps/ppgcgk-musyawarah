@@ -6,10 +6,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users, ArrowLeft } from 'lucide-react'
+import { ToastContainer } from '@/components/ui/toast'
+import { useToast } from '@/hooks/use-toast'
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const { toasts, removeToast, toast } = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,13 +29,13 @@ export default function AdminLoginPage() {
       if (response.ok) {
         // Save user data to localStorage
         localStorage.setItem('admin_user', JSON.stringify(data.user))
-        alert(`Login berhasil! Selamat datang ${data.user.nama}`)
-        window.location.href = '/admin'
+        toast.success(`Login berhasil! Selamat datang ${data.user.nama}`)
+        setTimeout(() => window.location.href = '/admin', 1200)
       } else {
-        alert(data.error || 'Login gagal')
+        toast.error(data.error || 'Login gagal')
       }
     } catch (error) {
-      alert('Terjadi kesalahan sistem')
+      toast.error('Terjadi kesalahan sistem')
     }
   }
 
@@ -95,6 +98,7 @@ export default function AdminLoginPage() {
           </CardContent>
         </Card>
       </div>
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   )
 }

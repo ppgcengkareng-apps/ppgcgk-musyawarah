@@ -6,11 +6,14 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, User, UserCheck, Phone, Briefcase, Building } from 'lucide-react'
+import { ToastContainer } from '@/components/ui/toast'
+import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 
 export default function TambahPeserta() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const { toasts, removeToast, toast } = useToast()
   const [formData, setFormData] = useState({
     nama: '',
     username: '',
@@ -32,14 +35,14 @@ export default function TambahPeserta() {
       })
 
       if (response.ok) {
-        alert('Peserta berhasil ditambahkan!')
-        router.push('/admin/peserta')
+        toast.success('Peserta berhasil ditambahkan!')
+        setTimeout(() => router.push('/admin/peserta'), 1200)
       } else {
         const data = await response.json()
-        alert(data.error || 'Gagal menambah peserta')
+        toast.error(data.error || 'Gagal menambah peserta')
       }
     } catch (error) {
-      alert('Terjadi kesalahan sistem')
+      toast.error('Terjadi kesalahan sistem')
     } finally {
       setIsLoading(false)
     }
@@ -193,6 +196,7 @@ export default function TambahPeserta() {
           </CardContent>
         </Card>
       </div>
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   )
 }
