@@ -71,6 +71,12 @@ export async function PUT(
     
     console.log('Update data being sent:', updateData)
     console.log('Original deskripsi from request:', deskripsi)
+    console.log('Deskripsi length:', deskripsi?.length)
+    
+    // Validate deskripsi is not truncated
+    if (deskripsi && deskripsi.length === 1) {
+      console.warn('WARNING: Deskripsi appears to be truncated to 1 character:', deskripsi)
+    }
 
     const { data: session, error } = await (supabase as any)
       .from('sesi_musyawarah')
