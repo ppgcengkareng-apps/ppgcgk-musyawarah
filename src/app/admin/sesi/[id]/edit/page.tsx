@@ -35,6 +35,11 @@ export default function EditSession() {
 
   useEffect(() => {
     if (sessionData) {
+      console.log('Setting form data from sessionData:', sessionData)
+      console.log('Deskripsi value:', sessionData.deskripsi)
+      console.log('Deskripsi type:', typeof sessionData.deskripsi)
+      console.log('Deskripsi length:', sessionData.deskripsi?.length)
+      
       setFormData({
         nama_sesi: sessionData.nama_sesi || '',
         deskripsi: sessionData.deskripsi || '',

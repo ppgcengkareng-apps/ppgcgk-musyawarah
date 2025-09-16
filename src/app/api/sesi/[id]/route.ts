@@ -16,12 +16,16 @@ export async function GET(
       .single()
 
     if (error) {
+      console.error('Database error:', error)
       return NextResponse.json(
         { error: 'Sesi tidak ditemukan' },
         { status: 404 }
       )
     }
 
+    console.log('Raw session data from DB:', session)
+    console.log('Deskripsi field:', session?.deskripsi)
+    
     return NextResponse.json(session)
 
   } catch (error) {
@@ -64,6 +68,9 @@ export async function PUT(
       maksimal_peserta: parseInt(maksimal_peserta) || 100,
       updated_at: new Date().toISOString()
     }
+    
+    console.log('Update data being sent:', updateData)
+    console.log('Original deskripsi from request:', deskripsi)
 
     const { data: session, error } = await (supabase as any)
       .from('sesi_musyawarah')
