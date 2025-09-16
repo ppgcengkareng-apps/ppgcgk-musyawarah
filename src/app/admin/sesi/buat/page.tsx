@@ -19,7 +19,10 @@ export default function CreateSession() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [participants, setParticipants] = useState<Peserta[]>([])
+  const [filteredParticipants, setFilteredParticipants] = useState<Peserta[]>([])
   const [selectedParticipants, setSelectedParticipants] = useState<string[]>([])
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filterBidang, setFilterBidang] = useState('semua')
   const [formData, setFormData] = useState({
     nama_sesi: '',
     deskripsi: '',
@@ -35,6 +38,31 @@ export default function CreateSession() {
     fetchParticipants()
   }, [])
 
+  useEffect(() => {
+    filterParticipants()
+  }, [participants, searchTerm, filterBidang])
+
+  const filterParticipants = () => {
+    let filtered = participants
+
+    // Filter by search term
+    if (searchTerm) {
+      filtered = filtered.filter(p => 
+        p.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.username.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    }
+
+    // Filter by bidang
+    if (filterBidang !== 'semua') {
+      filtered = filtered.filter(p => 
+        p.bidang.toLowerCase().includes(filterBidang.toLowerCase())
+      )
+    }
+
+    setFilteredParticipants(filtered)
+  }
+
   const fetchParticipants = async () => {
     try {
       const response = await fetch('/api/peserta')
@@ -42,6 +70,7 @@ export default function CreateSession() {
         const data = await response.json()
         const pesertaOnly = data.filter((p: any) => p.role === 'peserta')
         setParticipants(pesertaOnly)
+        setFilteredParticipants(pesertaOnly)
       }
     } catch (error) {
       console.error('Error fetching participants:', error)
@@ -60,8 +89,31 @@ export default function CreateSession() {
     setSelectedParticipants(participants.map(p => p.id))
   }
 
+  const selectFilteredParticipants = () => {
+    const newSelected = [...selectedParticipants]
+    filteredParticipants.forEach(p => {
+      if (!newSelected.includes(p.id)) {
+        newSelected.push(p.id)
+      }
+    })
+    setSelectedParticipants(newSelected)
+  }
+
   const clearAllParticipants = () => {
     setSelectedParticipants([])
+  }
+
+  const selectByBidang = (bidang: string) => {
+    const bidangParticipants = participants.filter(p => 
+      p.bidang.toLowerCase().includes(bidang.toLowerCase())
+    )
+    const newSelected = [...selectedParticipants]
+    bidangParticipants.forEach(p => {
+      if (!newSelected.includes(p.id)) {
+        newSelected.push(p.id)
+      }
+    })
+    setSelectedParticipants(newSelected)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -279,13 +331,78 @@ export default function CreateSession() {
                     </Button>
                   </div>
                 </div>
+
+                {/* Search and Filter */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                  <div className="md:col-span-2">
+                    <Input
+                      placeholder="Cari nama atau username peserta..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <select
+                      value={filterBidang}
+                      onChange={(e) => setFilterBidang(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                    >
+                      <option value="semua">Semua Bidang</option>
+                      <option value="ph">Bid. PH</option>
+                      <option value="kurikulum">Bid. Kurikulum</option>
+                      <option value="kesiswaan">Bid. Kesiswaan</option>
+                      <option value="humas">Bid. Humas</option>
+                      <option value="sarana">Bid. Sarana</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Quick Select Buttons */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={selectFilteredParticipants}
+                    disabled={filteredParticipants.length === 0}
+                  >
+                    Pilih Hasil Filter ({filteredParticipants.length})
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => selectByBidang('ph')}
+                  >
+                    Pilih Bid. PH
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => selectByBidang('kurikulum')}
+                  >
+                    Pilih Bid. Kurikulum
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => selectByBidang('kesiswaan')}
+                  >
+                    Pilih Bid. Kesiswaan
+                  </Button>
+                </div>
                 
                 <div className="border border-gray-300 rounded-lg p-4 max-h-60 overflow-y-auto">
                   {participants.length === 0 ? (
                     <p className="text-gray-500 text-center py-4">Memuat data peserta...</p>
+                  ) : filteredParticipants.length === 0 ? (
+                    <p className="text-gray-500 text-center py-4">Tidak ada peserta yang sesuai filter</p>
                   ) : (
                     <div className="grid grid-cols-1 gap-2">
-                      {participants.map((participant) => (
+                      {filteredParticipants.map((participant) => (
                         <label
                           key={participant.id}
                           className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
