@@ -30,17 +30,23 @@ export default function CreateNotulensiForm() {
 
   const fetchSessions = async () => {
     try {
-      const client = createClient()
-      if (!client) return
+      console.log('Fetching sessions from API...')
+      const response = await fetch('/api/sesi')
       
-      const { data } = await client
-        .from('sesi_musyawarah')
-        .select('id, nama_sesi, tanggal')
-        .order('tanggal', { ascending: false })
+      if (!response.ok) {
+        console.error('API response not ok:', response.status)
+        toast.error('Gagal memuat data sesi')
+        return
+      }
+      
+      const data = await response.json()
+      console.log('Sessions API result:', data)
       
       setSessions(data || [])
+      console.log('Sessions set:', data?.length || 0, 'items')
     } catch (error) {
       console.error('Error fetching sessions:', error)
+      toast.error('Terjadi kesalahan saat memuat sesi')
     }
   }
 
