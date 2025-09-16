@@ -81,7 +81,7 @@ export default function SessionManagement() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Manajemen Sesi</h1>
           <p className="text-gray-600 mt-2">
-            Kelola sesi musyawarah PPG ({sessions.length} sesi)
+            Kelola Sesi Musyawarah ({sessions.length} sesi)
           </p>
         </div>
         <Link href="/admin/sesi/buat">
