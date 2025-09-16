@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+// import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, Edit, Trash2, Check, X } from 'lucide-react'
 
 interface Notulensi {
@@ -127,9 +127,9 @@ export default function ViewNotulensiPage() {
     } as const
 
     return (
-      <Badge className={colors[status as keyof typeof colors]}>
+      <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[status as keyof typeof colors]}`}>
         {status.toUpperCase()}
-      </Badge>
+      </span>
     )
   }
 

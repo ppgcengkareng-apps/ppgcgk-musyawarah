@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+// import { Label } from '@/components/ui/label'
 import { ArrowLeft, Save } from 'lucide-react'
 import dynamic from 'next/dynamic'
 
@@ -125,7 +125,7 @@ export default function EditNotulensiPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="judul">Judul Notulensi *</Label>
+              <label htmlFor="judul" className="block text-sm font-medium mb-2">Judul Notulensi *</label>
               <Input
                 id="judul"
                 value={formData.judul}
