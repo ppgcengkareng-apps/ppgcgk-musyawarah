@@ -52,6 +52,12 @@ export default function CreateNotulensiForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (!formData.sesi_id || !formData.judul) {
+      toast.error('Sesi dan judul wajib diisi')
+      return
+    }
+    
     setIsLoading(true)
 
     try {
@@ -62,13 +68,15 @@ export default function CreateNotulensiForm() {
       })
 
       if (response.ok) {
+        const data = await response.json()
         toast.success('Notulensi berhasil dibuat!')
         setTimeout(() => router.push('/admin/notulensi'), 1200)
       } else {
-        const data = await response.json()
-        toast.error(data.error || 'Gagal membuat notulensi')
+        const errorData = await response.json()
+        toast.error(errorData.error || 'Gagal membuat notulensi')
       }
     } catch (error) {
+      console.error('Submit error:', error)
       toast.error('Terjadi kesalahan sistem')
     } finally {
       setIsLoading(false)

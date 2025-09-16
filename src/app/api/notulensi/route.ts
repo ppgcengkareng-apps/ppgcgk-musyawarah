@@ -43,6 +43,14 @@ export async function POST(request: NextRequest) {
     const supabase = createServerClient()
     const body = await request.json()
     
+    // Validate required fields
+    if (!body.sesi_id || !body.judul) {
+      return NextResponse.json(
+        { error: 'Sesi ID dan judul wajib diisi' },
+        { status: 400 }
+      )
+    }
+    
     // Get first admin user as creator
     const { data: adminUser } = await supabase
       .from('peserta')
@@ -51,17 +59,17 @@ export async function POST(request: NextRequest) {
       .limit(1)
       .single()
 
-    const createdBy = (adminUser as any)?.id || '00000000-0000-0000-0000-000000000000'
+    const createdBy = adminUser?.id || '00000000-0000-0000-0000-000000000000'
 
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('notulensi_sesi')
       .insert({
         sesi_id: body.sesi_id,
         judul: body.judul,
         agenda: body.isi_notulensi || '',
         pembahasan: body.isi_notulensi || '',
-        keputusan: body.kesimpulan,
-        tindak_lanjut: body.tindak_lanjut,
+        keputusan: body.kesimpulan || '',
+        tindak_lanjut: body.tindak_lanjut || '',
         status: 'draft',
         version: 1,
         dibuat_oleh: createdBy
@@ -70,6 +78,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
+      console.error('Database error:', error)
       return NextResponse.json(
         { error: 'Gagal membuat notulensi' },
         { status: 500 }
@@ -81,7 +90,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Create meeting note error:', error)
     return NextResponse.json(
-      { error: `Server error: ${error instanceof Error ? error.message : 'Unknown error'}` },
+      { error: 'Terjadi kesalahan sistem' },
       { status: 500 }
     )
   }
