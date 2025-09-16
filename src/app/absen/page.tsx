@@ -92,7 +92,7 @@ export default function PublicAttendancePage() {
     }
   }
 
-  const getStatusBadge = (status: string | null) => {
+  const getStatusBadge = (status: string | null | undefined) => {
     if (!status) return <span className="text-gray-500 text-sm">Belum Absen</span>
     
     const badges = {
