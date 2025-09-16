@@ -53,20 +53,31 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create session with data truncation for database limits
+    // Create session with minimal required fields only
+    const insertData: any = {
+      nama_sesi: nama_sesi?.substring(0, 100) || '',
+      tanggal,
+      waktu_mulai: waktu_mulai?.substring(0, 5) || '',
+      waktu_selesai: waktu_selesai?.substring(0, 5) || ''
+    }
+
+    // Add optional fields only if they exist and are short enough
+    if (deskripsi && deskripsi.trim()) {
+      insertData.deskripsi = deskripsi.substring(0, 500)
+    }
+    if (lokasi && lokasi.trim()) {
+      insertData.lokasi = lokasi.substring(0, 100)
+    }
+    if (tipe && tipe.length <= 10) {
+      insertData.tipe = tipe
+    }
+    if (maksimal_peserta) {
+      insertData.maksimal_peserta = maksimal_peserta
+    }
+
     const { data: session, error: sessionError } = await (supabase as any)
       .from('sesi_musyawarah')
-      .insert({
-        nama_sesi: nama_sesi?.substring(0, 255) || '',
-        deskripsi: deskripsi?.substring(0, 1000) || null,
-        tanggal,
-        waktu_mulai: waktu_mulai?.substring(0, 8) || '',
-        waktu_selesai: waktu_selesai?.substring(0, 8) || '',
-        lokasi: lokasi?.substring(0, 255) || null,
-        tipe: (tipe || 'offline').substring(0, 10),
-        maksimal_peserta: maksimal_peserta || 100,
-        status: 'scheduled'
-      })
+      .insert(insertData)
       .select()
       .single()
 
