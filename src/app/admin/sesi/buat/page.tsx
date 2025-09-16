@@ -74,7 +74,8 @@ export default function CreateSession() {
         setFilteredParticipants(pesertaOnly)
         
         // Extract unique bidang values
-        const uniqueBidang = [...new Set(pesertaOnly.map((p: any) => p.bidang))]
+        const bidangList = pesertaOnly.map((p: any) => p.bidang)
+        const uniqueBidang = Array.from(new Set(bidangList))
           .filter(bidang => bidang && bidang.trim() !== '')
           .sort()
         setAvailableBidang(uniqueBidang)
