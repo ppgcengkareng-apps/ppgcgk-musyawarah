@@ -49,15 +49,15 @@ export default function CreateSession() {
     // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter(p => 
-        p.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.username.toLowerCase().includes(searchTerm.toLowerCase())
+        (p.nama && p.nama.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (p.username && p.username.toLowerCase().includes(searchTerm.toLowerCase()))
       )
     }
 
     // Filter by bidang
     if (filterBidang !== 'semua') {
       filtered = filtered.filter(p => 
-        p.bidang === filterBidang
+        p.bidang && p.bidang === filterBidang
       )
     }
 
@@ -113,7 +113,7 @@ export default function CreateSession() {
 
   const selectByBidang = (bidang: string) => {
     const bidangParticipants = participants.filter(p => 
-      p.bidang === bidang
+      p.bidang && p.bidang === bidang
     )
     const newSelected = [...selectedParticipants]
     bidangParticipants.forEach(p => {
@@ -426,8 +426,8 @@ export default function CreateSession() {
                             className="mr-3 h-4 w-4 text-blue-600"
                           />
                           <div className="flex-1">
-                            <p className="font-medium text-sm">{participant.nama}</p>
-                            <p className="text-xs text-gray-600">{participant.username} • {participant.bidang}</p>
+                            <p className="font-medium text-sm">{participant.nama || 'Nama tidak tersedia'}</p>
+                            <p className="text-xs text-gray-600">{participant.username || 'Username tidak tersedia'} • {participant.bidang || 'Bidang tidak tersedia'}</p>
                           </div>
                         </label>
                       ))}
