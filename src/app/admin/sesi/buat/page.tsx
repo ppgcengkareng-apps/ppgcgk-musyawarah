@@ -23,6 +23,7 @@ export default function CreateSession() {
   const [selectedParticipants, setSelectedParticipants] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [filterBidang, setFilterBidang] = useState('semua')
+  const [availableBidang, setAvailableBidang] = useState<string[]>([])
   const [formData, setFormData] = useState({
     nama_sesi: '',
     deskripsi: '',
@@ -56,7 +57,7 @@ export default function CreateSession() {
     // Filter by bidang
     if (filterBidang !== 'semua') {
       filtered = filtered.filter(p => 
-        p.bidang.toLowerCase().includes(filterBidang.toLowerCase())
+        p.bidang === filterBidang
       )
     }
 
@@ -71,6 +72,12 @@ export default function CreateSession() {
         const pesertaOnly = data.filter((p: any) => p.role === 'peserta')
         setParticipants(pesertaOnly)
         setFilteredParticipants(pesertaOnly)
+        
+        // Extract unique bidang values
+        const uniqueBidang = [...new Set(pesertaOnly.map((p: any) => p.bidang))]
+          .filter(bidang => bidang && bidang.trim() !== '')
+          .sort()
+        setAvailableBidang(uniqueBidang)
       }
     } catch (error) {
       console.error('Error fetching participants:', error)
@@ -105,7 +112,7 @@ export default function CreateSession() {
 
   const selectByBidang = (bidang: string) => {
     const bidangParticipants = participants.filter(p => 
-      p.bidang.toLowerCase().includes(bidang.toLowerCase())
+      p.bidang === bidang
     )
     const newSelected = [...selectedParticipants]
     bidangParticipants.forEach(p => {
@@ -349,11 +356,11 @@ export default function CreateSession() {
                       className="w-full p-2 border border-gray-300 rounded-md text-sm"
                     >
                       <option value="semua">Semua Bidang</option>
-                      <option value="ph">Bid. PH</option>
-                      <option value="kurikulum">Bid. Kurikulum</option>
-                      <option value="kesiswaan">Bid. Kesiswaan</option>
-                      <option value="humas">Bid. Humas</option>
-                      <option value="sarana">Bid. Sarana</option>
+                      {availableBidang.map((bidang) => (
+                        <option key={bidang} value={bidang}>
+                          {bidang}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -369,30 +376,22 @@ export default function CreateSession() {
                   >
                     Pilih Hasil Filter ({filteredParticipants.length})
                   </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => selectByBidang('ph')}
-                  >
-                    Pilih Bid. PH
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => selectByBidang('kurikulum')}
-                  >
-                    Pilih Bid. Kurikulum
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => selectByBidang('kesiswaan')}
-                  >
-                    Pilih Bid. Kesiswaan
-                  </Button>
+                  {availableBidang.slice(0, 4).map((bidang) => (
+                    <Button
+                      key={bidang}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => selectByBidang(bidang)}
+                    >
+                      Pilih {bidang}
+                    </Button>
+                  ))}
+                  {availableBidang.length > 4 && (
+                    <span className="text-xs text-gray-500 self-center">
+                      +{availableBidang.length - 4} bidang lainnya
+                    </span>
+                  )}
                 </div>
                 
                 <div className="border border-gray-300 rounded-lg p-4 max-h-60 overflow-y-auto">
