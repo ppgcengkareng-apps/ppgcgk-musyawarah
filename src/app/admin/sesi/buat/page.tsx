@@ -77,7 +77,7 @@ export default function CreateSession() {
         const bidangList = pesertaOnly.map((p: any) => p.bidang)
         const uniqueBidang = Array.from(new Set(bidangList))
           .filter((bidang: any) => bidang && typeof bidang === 'string' && bidang.trim() !== '')
-          .sort()
+          .sort() as string[]
         setAvailableBidang(uniqueBidang)
       }
     } catch (error) {
