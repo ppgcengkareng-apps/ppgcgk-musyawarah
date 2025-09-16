@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get attendance status for each session
-    const sessionIds = sessions?.map(s => s.sesi_musyawarah.id) || []
+    const sessionIds = sessions?.map((s: any) => s.sesi_musyawarah.id) || []
     const { data: attendanceRecords } = await (supabase as any)
       .from('absensi')
       .select('sesi_id, status_kehadiran')
@@ -63,15 +63,15 @@ export async function GET(request: NextRequest) {
       .in('sesi_id', sessionIds)
 
     // Combine session data with attendance status
-    const sessionsWithStatus = sessions?.map(s => ({
+    const sessionsWithStatus = sessions?.map((s: any) => ({
       id: s.sesi_musyawarah.id,
       nama_sesi: s.sesi_musyawarah.nama_sesi,
       tanggal: s.sesi_musyawarah.tanggal,
       waktu_mulai: s.sesi_musyawarah.waktu_mulai,
       waktu_selesai: s.sesi_musyawarah.waktu_selesai,
       lokasi: s.sesi_musyawarah.lokasi,
-      status_absensi: attendanceRecords?.find(a => a.sesi_id === s.sesi_musyawarah.id)?.status_kehadiran || null
-    })).filter(s => s.id) // Filter out null sessions
+      status_absensi: attendanceRecords?.find((a: any) => a.sesi_id === s.sesi_musyawarah.id)?.status_kehadiran || null
+    })).filter((s: any) => s.id) // Filter out null sessions
 
     return NextResponse.json({
       peserta,
