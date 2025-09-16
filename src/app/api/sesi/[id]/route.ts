@@ -24,7 +24,7 @@ export async function GET(
     }
 
     console.log('Raw session data from DB:', session)
-    console.log('Deskripsi field:', session?.deskripsi)
+    console.log('Deskripsi field:', (session as any)?.deskripsi)
     
     return NextResponse.json(session)
 
