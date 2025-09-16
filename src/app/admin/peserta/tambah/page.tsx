@@ -141,13 +141,13 @@ export default function TambahPeserta() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     <Building className="w-4 h-4 inline mr-1" />
-                    Desa - Kelompok
+                    Bidang
                   </label>
                   <Input
                     name="instansi"
                     value={formData.instansi}
                     onChange={handleChange}
-                    placeholder="Nama Desa - Nama Kelompok"
+                    placeholder="Contoh: Bid. PH, Bid. Kurikulum, dll"
                   />
                 </div>
 
