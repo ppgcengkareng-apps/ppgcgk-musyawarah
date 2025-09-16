@@ -5,12 +5,13 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createServerClient()
 
-    const { data: sessions, error } = await supabase
+    const { data: sessions, error } = await (supabase as any)
       .from('sesi_musyawarah')
       .select('*')
       .order('tanggal', { ascending: false })
 
     if (error) {
+      console.error('Get sessions error:', error)
       return NextResponse.json(
         { error: 'Gagal memuat data sesi' },
         { status: 500 }
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(sessions || [])
 
   } catch (error) {
-    console.error('Get sessions error:', error)
+    console.error('Get sessions API error:', error)
     return NextResponse.json(
       { error: 'Terjadi kesalahan sistem' },
       { status: 500 }
@@ -30,8 +31,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = createServerClient()
     const body = await request.json()
-    console.log('Request body:', body)
     
     const { 
       nama_sesi, 
@@ -41,87 +42,86 @@ export async function POST(request: NextRequest) {
       waktu_selesai, 
       lokasi, 
       tipe, 
-      maksimal_peserta 
+      maksimal_peserta,
+      peserta_ids 
     } = body
 
+    // Validate required fields
     if (!nama_sesi || !tanggal || !waktu_mulai || !waktu_selesai) {
       return NextResponse.json(
-        { error: 'Data sesi tidak lengkap' },
+        { error: 'Data tidak lengkap' },
         { status: 400 }
       )
     }
 
-    const supabase = createServerClient()
-
-    // Get any existing user as creator
-    const { data: existingUser } = await supabase
-      .from('peserta')
-      .select('id')
-      .limit(1)
-      .single()
-
-    let createdBy = (existingUser as any)?.id
-
-    // If no user exists, create a default admin user
-    if (!createdBy) {
-      const { data: newUser } = await (supabase as any)
-        .from('peserta')
-        .insert({
-          nama: 'Admin System',
-          email: 'admin@system.com',
-          role: 'admin',
-          aktif: true
-        })
-        .select('id')
-        .single()
-      
-      createdBy = (newUser as any)?.id || '00000000-0000-0000-0000-000000000000'
+    if (!peserta_ids || peserta_ids.length === 0) {
+      return NextResponse.json(
+        { error: 'Pilih minimal 1 peserta yang wajib hadir' },
+        { status: 400 }
+      )
     }
 
-    const insertData = {
-      nama_sesi,
-      deskripsi: deskripsi || null,
-      tanggal,
-      waktu_mulai: waktu_mulai.substring(0, 8),
-      waktu_selesai: waktu_selesai.substring(0, 8),
-      lokasi: lokasi || null,
-      tipe: tipe || 'offline',
-      maksimal_peserta: parseInt(maksimal_peserta) || 100,
-      status: 'scheduled',
-      created_by: createdBy,
-      timezone: 'WIB',
-      batas_absen_mulai: 30,
-      batas_absen_selesai: 15
-    }
-
-    // Sanitize log data to prevent log injection
-    const sanitizedData = {
-      ...insertData,
-      nama_sesi: insertData.nama_sesi?.replace(/[\r\n]/g, ' '),
-      deskripsi: insertData.deskripsi?.replace(/[\r\n]/g, ' ')
-    }
-    console.log('Insert data:', sanitizedData)
-
-    const { data: session, error } = await (supabase as any)
+    // Create session
+    const { data: session, error: sessionError } = await (supabase as any)
       .from('sesi_musyawarah')
-      .insert(insertData)
+      .insert({
+        nama_sesi,
+        deskripsi: deskripsi || null,
+        tanggal,
+        waktu_mulai,
+        waktu_selesai,
+        lokasi: lokasi || null,
+        tipe: tipe || 'offline',
+        maksimal_peserta: maksimal_peserta || 100,
+        status: 'scheduled',
+        created_at: new Date().toISOString()
+      })
       .select()
       .single()
 
-    if (error) {
-      console.error('Supabase error:', error)
+    if (sessionError) {
+      console.error('Create session error:', sessionError)
       return NextResponse.json(
-        { error: `Database error: ${error.message}` },
+        { error: 'Gagal membuat sesi' },
         { status: 500 }
       )
     }
 
-    return NextResponse.json(session)
+    // Create session-participant relationships
+    const sesiPesertaData = peserta_ids.map((peserta_id: string) => ({
+      sesi_id: session.id,
+      peserta_id,
+      wajib_hadir: true,
+      created_at: new Date().toISOString()
+    }))
+
+    const { error: relationError } = await (supabase as any)
+      .from('sesi_peserta')
+      .insert(sesiPesertaData)
+
+    if (relationError) {
+      console.error('Create session-participant relation error:', relationError)
+      // Rollback: delete the created session
+      await (supabase as any)
+        .from('sesi_musyawarah')
+        .delete()
+        .eq('id', session.id)
+      
+      return NextResponse.json(
+        { error: 'Gagal menyimpan data peserta' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      message: 'Sesi berhasil dibuat',
+      data: session
+    })
 
   } catch (error) {
-    console.error('Create session error:', error)
+    console.error('Create session API error:', error)
     return NextResponse.json(
-      { error: `Server error: ${error instanceof Error ? error.message : 'Unknown error'}` },
+      { error: 'Terjadi kesalahan sistem' },
       { status: 500 }
     )
   }

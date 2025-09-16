@@ -128,18 +128,20 @@ export async function PUT(
     const supabase = createServerClient()
     const { id } = params
     const body = await request.json()
+    const { peserta_ids, ...sessionData } = body
 
+    // Update session data
     const { data, error } = await (supabase as any)
       .from('sesi_musyawarah')
       .update({
-        nama_sesi: body.nama_sesi,
-        deskripsi: body.deskripsi,
-        tanggal: body.tanggal,
-        waktu_mulai: body.waktu_mulai,
-        waktu_selesai: body.waktu_selesai,
-        lokasi: body.lokasi,
-        tipe: body.tipe,
-        maksimal_peserta: body.maksimal_peserta,
+        nama_sesi: sessionData.nama_sesi,
+        deskripsi: sessionData.deskripsi,
+        tanggal: sessionData.tanggal,
+        waktu_mulai: sessionData.waktu_mulai,
+        waktu_selesai: sessionData.waktu_selesai,
+        lokasi: sessionData.lokasi,
+        tipe: sessionData.tipe,
+        maksimal_peserta: sessionData.maksimal_peserta,
         updated_at: new Date().toISOString()
       })
       .eq('id', id)
@@ -151,6 +153,37 @@ export async function PUT(
         { error: 'Gagal mengupdate sesi' },
         { status: 500 }
       )
+    }
+
+    // Update participants if provided
+    if (peserta_ids && Array.isArray(peserta_ids)) {
+      // Delete existing participants
+      await (supabase as any)
+        .from('sesi_peserta')
+        .delete()
+        .eq('sesi_id', id)
+
+      // Insert new participants
+      if (peserta_ids.length > 0) {
+        const sesiPesertaData = peserta_ids.map((peserta_id: string) => ({
+          sesi_id: id,
+          peserta_id,
+          wajib_hadir: true,
+          created_at: new Date().toISOString()
+        }))
+
+        const { error: relationError } = await (supabase as any)
+          .from('sesi_peserta')
+          .insert(sesiPesertaData)
+
+        if (relationError) {
+          console.error('Update session-participant relation error:', relationError)
+          return NextResponse.json(
+            { error: 'Gagal mengupdate data peserta' },
+            { status: 500 }
+          )
+        }
+      }
     }
 
     return NextResponse.json(data)
