@@ -128,20 +128,18 @@ export default function CreateSession() {
     e.preventDefault()
     setIsLoading(true)
 
-    if (selectedParticipants.length === 0) {
-      alert('Pilih minimal 1 peserta yang wajib hadir')
-      setIsLoading(false)
-      return
-    }
+    // Temporarily skip participant validation
+    // if (selectedParticipants.length === 0) {
+    //   alert('Pilih minimal 1 peserta yang wajib hadir')
+    //   setIsLoading(false)
+    //   return
+    // }
 
     try {
       const response = await fetch('/api/sesi', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          peserta_ids: selectedParticipants
-        })
+        body: JSON.stringify(formData)
       })
 
       if (response.ok) {
