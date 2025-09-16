@@ -15,6 +15,7 @@ export default function EditSession() {
   
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingData, setIsLoadingData] = useState(true)
+  const [sessionData, setSessionData] = useState<any>(null)
   const [formData, setFormData] = useState({
     nama_sesi: '',
     deskripsi: '',
@@ -32,21 +33,30 @@ export default function EditSession() {
     }
   }, [sessionId])
 
+  useEffect(() => {
+    if (sessionData) {
+      setFormData({
+        nama_sesi: sessionData.nama_sesi || '',
+        deskripsi: sessionData.deskripsi || '',
+        tanggal: sessionData.tanggal || '',
+        waktu_mulai: sessionData.waktu_mulai || '',
+        waktu_selesai: sessionData.waktu_selesai || '',
+        lokasi: sessionData.lokasi || '',
+        tipe: sessionData.tipe || 'offline',
+        maksimal_peserta: sessionData.maksimal_peserta || 100
+      })
+    }
+  }, [sessionData])
+
   const fetchSession = async () => {
     try {
       const response = await fetch(`/api/sesi/${sessionId}`)
       if (response.ok) {
         const data = await response.json()
-        setFormData({
-          nama_sesi: data.nama_sesi || '',
-          deskripsi: data.deskripsi || '',
-          tanggal: data.tanggal || '',
-          waktu_mulai: data.waktu_mulai || '',
-          waktu_selesai: data.waktu_selesai || '',
-          lokasi: data.lokasi || '',
-          tipe: data.tipe || 'offline',
-          maksimal_peserta: data.maksimal_peserta || 100
-        })
+        console.log('Session data received:', data) // Debug log
+        setSessionData(data)
+      } else {
+        console.error('Failed to fetch session:', response.status)
       }
     } catch (error) {
       console.error('Error fetching session:', error)
