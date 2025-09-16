@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       .limit(1)
       .single()
 
-    const createdBy = adminUser?.id || '00000000-0000-0000-0000-000000000000'
+    const createdBy = (adminUser as any)?.id || '00000000-0000-0000-0000-000000000000'
 
     const { data, error } = await supabase
       .from('notulensi_sesi')
