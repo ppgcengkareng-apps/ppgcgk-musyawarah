@@ -1,15 +1,11 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus, Search, FileText, Clock, CheckCircle, XCircle, Eye, Edit, Users, ArrowLeft, Calendar } from 'lucide-react'
+import { Plus, Search, FileText, Clock, CheckCircle, XCircle, Eye, Edit, Users } from 'lucide-react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
-
-const supabase = createClient()
 
 const formatDate = (date: string) => new Date(date).toLocaleDateString('id-ID')
 const getStatusColor = (status: string) => {
@@ -51,203 +47,11 @@ interface MeetingNote {
   version: number
 }
 
-function CreateNotulensiForm() {
-  const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
-  const [sessions, setSessions] = useState<any[]>([])
-  const [formData, setFormData] = useState({
-    sesi_id: '',
-    judul: '',
-    isi_notulensi: '',
-    kesimpulan: '',
-    tindak_lanjut: ''
-  })
-
-  useEffect(() => {
-    fetchSessions()
-  }, [])
-
-  const fetchSessions = async () => {
-    try {
-      const client = createClient()
-      if (!client) return
-      
-      const { data } = await client
-        .from('sesi_musyawarah')
-        .select('id, nama_sesi, tanggal')
-        .order('tanggal', { ascending: false })
-      
-      setSessions(data || [])
-    } catch (error) {
-      console.error('Error fetching sessions:', error)
-    }
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-
-    try {
-      const response = await fetch('/api/notulensi', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      })
-
-      if (response.ok) {
-        alert('Notulensi berhasil dibuat!')
-        router.push('/admin/notulensi')
-      } else {
-        const data = await response.json()
-        alert(data.error || 'Gagal membuat notulensi')
-      }
-    } catch (error) {
-      alert('Terjadi kesalahan sistem')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
-  }
-
-  return (
-    <div className="p-6">
-      <div className="mb-6">
-        <Link href="/admin/notulensi" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4">
-          <ArrowLeft className="w-4 h-4 mr-1" />
-          Kembali ke Daftar Notulensi
-        </Link>
-        <h1 className="text-3xl font-bold text-gray-900">Buat Notulensi Baru</h1>
-        <p className="text-gray-600 mt-2">
-          Buat notulensi untuk sesi musyawarah PPG
-        </p>
-      </div>
-
-      <div className="max-w-4xl">
-        <Card>
-          <CardHeader>
-            <CardTitle>Informasi Notulensi</CardTitle>
-            <CardDescription>
-              Isi detail notulensi musyawarah yang akan dibuat
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <Calendar className="w-4 h-4 inline mr-1" />
-                  Pilih Sesi Musyawarah *
-                </label>
-                <select
-                  name="sesi_id"
-                  value={formData.sesi_id}
-                  onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-md"
-                  required
-                >
-                  <option value="">Pilih sesi musyawarah...</option>
-                  {sessions.map((sesi: any) => (
-                    <option key={sesi.id} value={sesi.id}>
-                      {sesi.nama_sesi} - {new Date(sesi.tanggal).toLocaleDateString('id-ID')}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Judul Notulensi *
-                </label>
-                <Input
-                  name="judul"
-                  value={formData.judul}
-                  onChange={handleChange}
-                  placeholder="Contoh: Notulensi Musyawarah PPG Daerah"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Isi Notulensi *
-                </label>
-                <textarea
-                  name="isi_notulensi"
-                  value={formData.isi_notulensi}
-                  onChange={handleChange}
-                  placeholder="Tulis isi notulensi musyawarah..."
-                  className="w-full p-3 border border-gray-300 rounded-md resize-none"
-                  rows={10}
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Kesimpulan
-                </label>
-                <textarea
-                  name="kesimpulan"
-                  value={formData.kesimpulan}
-                  onChange={handleChange}
-                  placeholder="Kesimpulan dari musyawarah..."
-                  className="w-full p-3 border border-gray-300 rounded-md resize-none"
-                  rows={4}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tindak Lanjut
-                </label>
-                <textarea
-                  name="tindak_lanjut"
-                  value={formData.tindak_lanjut}
-                  onChange={handleChange}
-                  placeholder="Tindak lanjut yang perlu dilakukan..."
-                  className="w-full p-3 border border-gray-300 rounded-md resize-none"
-                  rows={4}
-                />
-              </div>
-
-              <div className="flex space-x-4 pt-4">
-                <Button type="submit" disabled={isLoading} className="flex-1">
-                  <FileText className="w-4 h-4 mr-2" />
-                  {isLoading ? 'Membuat...' : 'Buat Notulensi'}
-                </Button>
-                <Link href="/admin/notulensi" className="flex-1">
-                  <Button type="button" variant="outline" className="w-full">
-                    Batal
-                  </Button>
-                </Link>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  )
-}
-
-function NotulensiContent() {
-  const searchParams = useSearchParams()
+export default function NotulensiManagement() {
   const [meetingNotes, setMeetingNotes] = useState<MeetingNote[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [isLoading, setIsLoading] = useState(true)
-
-  const action = searchParams?.get('action')
-  
-  // Show create form if action=buat
-  if (action === 'buat') {
-    return <CreateNotulensiForm />
-  }
 
   useEffect(() => {
     fetchMeetingNotes()
@@ -320,7 +124,7 @@ function NotulensiContent() {
             Kelola notulensi musyawarah PPG dan proses approval
           </p>
         </div>
-        <Link href="/admin/notulensi?action=buat">
+        <Link href="/admin/notulensi/buat">
           <Button>
             <Plus className="w-4 h-4 mr-2" />
             Buat Notulensi
@@ -493,7 +297,7 @@ function NotulensiContent() {
               }
             </p>
             {!searchTerm && statusFilter === 'all' && (
-              <Link href="/admin/notulensi?action=buat">
+              <Link href="/admin/notulensi/buat">
                 <Button>
                   <Plus className="w-4 h-4 mr-2" />
                   Buat Notulensi Pertama
@@ -504,20 +308,5 @@ function NotulensiContent() {
         </Card>
       )}
     </div>
-  )
-}
-
-export default function NotulensiManagement() {
-  return (
-    <Suspense fallback={
-      <div className="p-6">
-        <div className="text-center">
-          <div className="loading-spinner mx-auto mb-4"></div>
-          <p className="text-gray-600">Memuat halaman...</p>
-        </div>
-      </div>
-    }>
-      <NotulensiContent />
-    </Suspense>
   )
 }
