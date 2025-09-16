@@ -45,10 +45,10 @@ export async function POST(request: NextRequest) {
 
     // Skip time validation for testing - allow attendance anytime
     // TODO: Re-enable time validation for production
+    const now = new Date()
     
     /*
     // Check if attendance is within allowed time window
-    const now = new Date()
     const sessionData = session as any
     const sessionDate = new Date(sessionData.tanggal)
     const [startHour, startMinute] = sessionData.waktu_mulai.split(':').map(Number)
