@@ -238,11 +238,6 @@ function CreateNotulensiForm() {
 
 export default function NotulensiManagement() {
   const searchParams = useSearchParams()
-  const action = searchParams.get('action')
-  
-  if (action === 'buat') {
-    return <CreateNotulensiForm />
-  }
   const [meetingNotes, setMeetingNotes] = useState<MeetingNote[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
@@ -287,6 +282,12 @@ export default function NotulensiManagement() {
   }
 
   const stats = getStats()
+  const action = searchParams?.get('action')
+  
+  // Show create form if action=buat
+  if (action === 'buat') {
+    return <CreateNotulensiForm />
+  }
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -503,5 +504,20 @@ export default function NotulensiManagement() {
         </Card>
       )}
     </div>
+  )
+}
+
+export default function NotulensiManagement() {
+  return (
+    <Suspense fallback={
+      <div className="p-6">
+        <div className="text-center">
+          <div className="loading-spinner mx-auto mb-4"></div>
+          <p className="text-gray-600">Memuat halaman...</p>
+        </div>
+      </div>
+    }>
+      <NotulensiContent />
+    </Suspense>
   )
 }
