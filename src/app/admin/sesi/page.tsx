@@ -63,6 +63,26 @@ export default function SessionManagement() {
     }
   }
 
+  const handleDelete = async (sessionId: string, sessionName: string) => {
+    if (!confirm(`Yakin ingin menghapus sesi "${sessionName}"?`)) return
+
+    try {
+      const response = await fetch(`/api/sesi/${sessionId}`, {
+        method: 'DELETE'
+      })
+      
+      if (response.ok) {
+        setSessions(sessions.filter(s => s.id !== sessionId))
+        alert('Sesi berhasil dihapus')
+      } else {
+        alert('Gagal menghapus sesi')
+      }
+    } catch (error) {
+      console.error('Error deleting session:', error)
+      alert('Terjadi kesalahan saat menghapus sesi')
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="p-6">
@@ -129,19 +149,28 @@ export default function SessionManagement() {
                 </div>
               </div>
 
-              <div className="flex space-x-2 mt-4 pt-4 border-t">
-                <Link href={`/admin/sesi/${session.id}/edit`} className="flex-1">
+              <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t">
+                <Link href={`/admin/sesi/${session.id}/edit`}>
                   <Button variant="outline" size="sm" className="w-full">
                     <Edit className="w-4 h-4 mr-1" />
                     Edit
                   </Button>
                 </Link>
-                <Link href={`/absen/${session.id}`} className="flex-1">
+                <Link href={`/absen/${session.id}`}>
                   <Button size="sm" className="w-full">
                     <ExternalLink className="w-4 h-4 mr-1" />
                     Absensi
                   </Button>
                 </Link>
+                <Button 
+                  variant="destructive" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => handleDelete(session.id, session.nama_sesi)}
+                >
+                  <Trash2 className="w-4 h-4 mr-1" />
+                  Hapus
+                </Button>
               </div>
             </CardContent>
           </Card>
