@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,7 +10,6 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
 const supabase = createClient()
-// import { formatDate, getStatusColor, getStatusText } from '@/lib/utils'
 
 const formatDate = (date: string) => new Date(date).toLocaleDateString('id-ID')
 const getStatusColor = (status: string) => {
@@ -236,12 +235,19 @@ function CreateNotulensiForm() {
   )
 }
 
-export default function NotulensiManagement() {
+function NotulensiContent() {
   const searchParams = useSearchParams()
   const [meetingNotes, setMeetingNotes] = useState<MeetingNote[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [isLoading, setIsLoading] = useState(true)
+
+  const action = searchParams?.get('action')
+  
+  // Show create form if action=buat
+  if (action === 'buat') {
+    return <CreateNotulensiForm />
+  }
 
   useEffect(() => {
     fetchMeetingNotes()
@@ -282,12 +288,6 @@ export default function NotulensiManagement() {
   }
 
   const stats = getStats()
-  const action = searchParams?.get('action')
-  
-  // Show create form if action=buat
-  if (action === 'buat') {
-    return <CreateNotulensiForm />
-  }
 
   const getStatusIcon = (status: string) => {
     switch (status) {
