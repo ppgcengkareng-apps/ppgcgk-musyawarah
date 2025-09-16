@@ -85,7 +85,8 @@ export async function GET(
     const supabase = createServerClient()
     const { id } = params
 
-    const { data, error } = await (supabase as any)
+    // First try to get session with participants
+    let { data, error } = await (supabase as any)
       .from('sesi_musyawarah')
       .select(`
         *,
@@ -101,6 +102,28 @@ export async function GET(
       `)
       .eq('id', id)
       .single()
+
+    // If sesi_peserta table doesn't exist, get session without participants
+    if (error && error.code === '42P01') {
+      const { data: sessionData, error: sessionError } = await (supabase as any)
+        .from('sesi_musyawarah')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+      if (sessionError) {
+        return NextResponse.json(
+          { error: 'Sesi tidak ditemukan' },
+          { status: 404 }
+        )
+      }
+
+      // Return session without participants
+      return NextResponse.json({
+        ...sessionData,
+        sesi_peserta: []
+      })
+    }
 
     if (error) {
       return NextResponse.json(
