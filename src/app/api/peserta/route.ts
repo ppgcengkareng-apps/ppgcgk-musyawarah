@@ -11,10 +11,18 @@ export async function GET(request: NextRequest) {
       .order('nama')
 
     // Transform data to match expected format
-    const transformedParticipants = participants?.map(p => ({
-      ...p,
+    const transformedParticipants = participants?.map((p: any) => ({
+      id: p.id,
+      nama: p.nama,
       username: p.email, // Map email to username
-      bidang: p.instansi  // Map instansi to bidang
+      bidang: p.instansi, // Map instansi to bidang
+      email: p.email,
+      nomor_hp: p.nomor_hp,
+      jabatan: p.jabatan,
+      instansi: p.instansi,
+      role: p.role,
+      aktif: p.aktif,
+      created_at: p.created_at
     })) || []
 
     if (error) {
