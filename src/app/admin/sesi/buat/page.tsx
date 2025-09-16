@@ -180,16 +180,17 @@ export default function CreateSession() {
         </p>
       </div>
 
-      <div className="max-w-2xl">
-        <Card>
-          <CardHeader>
-            <CardTitle>Informasi Sesi</CardTitle>
-            <CardDescription>
-              Isi detail sesi musyawarah yang akan dibuat
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column - Session Info */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Informasi Sesi</CardTitle>
+              <CardDescription>
+                Isi detail sesi musyawarah yang akan dibuat
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
               {/* Basic Info */}
               <div className="space-y-4">
                 <div>
@@ -312,7 +313,18 @@ export default function CreateSession() {
                   max="100"
                 />
               </div>
+            </CardContent>
+          </Card>
 
+          {/* Right Column - Participant Selection */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Pilih Peserta</CardTitle>
+              <CardDescription>
+                Tentukan peserta yang wajib hadir di sesi ini
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
               {/* Participant Selection */}
               <div>
                 <div className="flex justify-between items-center mb-3">
@@ -427,22 +439,22 @@ export default function CreateSession() {
                   <p className="text-red-600 text-sm mt-2">* Pilih minimal 1 peserta yang wajib hadir</p>
                 )}
               </div>
+            </CardContent>
+          </Card>
+        </div>
 
-              {/* Submit */}
-              <div className="flex space-x-4 pt-4">
-                <Button type="submit" disabled={isLoading} className="flex-1">
-                  {isLoading ? 'Membuat...' : 'Buat Sesi'}
-                </Button>
-                <Link href="/admin/sesi" className="flex-1">
-                  <Button type="button" variant="outline" className="w-full">
-                    Batal
-                  </Button>
-                </Link>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
+        {/* Submit Buttons */}
+        <div className="flex space-x-4 pt-8 max-w-md mx-auto">
+          <Button type="submit" disabled={isLoading} className="flex-1">
+            {isLoading ? 'Membuat...' : 'Buat Sesi'}
+          </Button>
+          <Link href="/admin/sesi" className="flex-1">
+            <Button type="button" variant="outline" className="w-full">
+              Batal
+            </Button>
+          </Link>
+        </div>
+      </form>
     </div>
   )
 }
