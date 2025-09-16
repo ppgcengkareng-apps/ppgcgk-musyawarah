@@ -9,11 +9,37 @@ export async function GET(
     const supabase = createServerClient()
     const { id } = params
 
+    console.log('Fetching session with ID:', id)
+    
     const { data: session, error } = await supabase
       .from('sesi_musyawarah')
-      .select('*')
+      .select('id, nama_sesi, deskripsi, tanggal, waktu_mulai, waktu_selesai, lokasi, tipe, status, maksimal_peserta')
       .eq('id', id)
       .single()
+    
+    // If deskripsi is truncated, try to get it separately
+    if (session && (session as any).deskripsi === 's') {
+      console.log('Deskripsi appears truncated, trying separate query...')
+      const { data: deskripsiOnly } = await supabase
+        .from('sesi_musyawarah')
+        .select('deskripsi')
+        .eq('id', id)
+        .single()
+      
+      console.log('Separate deskripsi query result:', deskripsiOnly)
+      
+      if (deskripsiOnly && (deskripsiOnly as any).deskripsi !== 's') {
+        (session as any).deskripsi = (deskripsiOnly as any).deskripsi
+        console.log('Fixed deskripsi:', (session as any).deskripsi)
+      }
+    }
+
+    console.log('Supabase query result:')
+    console.log('- Error:', error)
+    console.log('- Data:', session)
+    console.log('- Deskripsi raw:', (session as any)?.deskripsi)
+    console.log('- Deskripsi length:', (session as any)?.deskripsi?.length)
+    console.log('- Deskripsi type:', typeof (session as any)?.deskripsi)
 
     if (error) {
       console.error('Database error:', error)
@@ -22,9 +48,6 @@ export async function GET(
         { status: 404 }
       )
     }
-
-    console.log('Raw session data from DB:', session)
-    console.log('Deskripsi field:', (session as any)?.deskripsi)
     
     return NextResponse.json(session)
 
