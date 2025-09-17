@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus, Calendar, Clock, MapPin, Users, Edit, Trash2, ExternalLink } from 'lucide-react'
+import { Plus, Calendar, Clock, MapPin, Users, Edit, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 // import { formatDate, formatTime, getStatusColor, getStatusText } from '@/lib/utils'
 
@@ -156,10 +156,10 @@ export default function SessionManagement() {
                     Edit
                   </Button>
                 </Link>
-                <Link href={`/absen/${session.id}`}>
+                <Link href={`/admin/sesi/${session.id}/kehadiran`}>
                   <Button size="sm" className="w-full">
-                    <ExternalLink className="w-4 h-4 mr-1" />
-                    Absensi
+                    <Users className="w-4 h-4 mr-1" />
+                    Kehadiran
                   </Button>
                 </Link>
                 <Button 

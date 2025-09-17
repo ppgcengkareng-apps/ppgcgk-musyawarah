@@ -9,15 +9,10 @@ export async function GET(
     const sesiId = params.id
     const supabase = createServerClient()
 
-    // Get attendance data with peserta info
-    const { data: absensi, error } = await supabase
-      .from('absensi')
+    // Get peserta assigned to this sesi
+    const { data: peserta, error } = await supabase
+      .from('sesi_peserta')
       .select(`
-        id,
-        peserta_id,
-        status_kehadiran,
-        waktu_absen,
-        catatan,
         peserta:peserta_id (
           id,
           nama,
@@ -27,17 +22,19 @@ export async function GET(
         )
       `)
       .eq('sesi_id', sesiId)
-      .order('waktu_absen', { ascending: true })
 
     if (error) {
-      console.error('Error fetching attendance:', error)
+      console.error('Error fetching peserta:', error)
       return NextResponse.json(
-        { error: 'Gagal mengambil data kehadiran' },
+        { error: 'Gagal mengambil data peserta' },
         { status: 500 }
       )
     }
 
-    return NextResponse.json(absensi || [])
+    // Extract peserta data from the nested structure
+    const pesertaList = peserta?.map(item => item.peserta).filter(Boolean) || []
+
+    return NextResponse.json(pesertaList)
 
   } catch (error) {
     console.error('API Error:', error)

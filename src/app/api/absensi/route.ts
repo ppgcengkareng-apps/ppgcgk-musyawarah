@@ -71,6 +71,15 @@ export async function POST(request: NextRequest) {
     }
     */
 
+    // Validate status_kehadiran
+    const validStatuses = ['hadir', 'ghoib', 'izin', 'sakit']
+    if (!validStatuses.includes(status_kehadiran)) {
+      return NextResponse.json(
+        { error: 'Status kehadiran tidak valid' },
+        { status: 400 }
+      )
+    }
+
     // Use selected status directly for testing
     let finalStatus = status_kehadiran
 
