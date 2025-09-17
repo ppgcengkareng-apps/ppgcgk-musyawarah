@@ -53,23 +53,25 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Insert with field length limits
+    // Get first admin user ID for created_by
+    const { data: adminUser } = await (supabase as any)
+      .from('peserta')
+      .select('id')
+      .in('role', ['admin', 'super_admin'])
+      .limit(1)
+      .single()
+
+    const createdBy = adminUser?.id || '00000000-0000-0000-0000-000000000001'
+
+    // Insert with required fields
     const { data: session, error: sessionError } = await (supabase as any)
       .from('sesi_musyawarah')
       .insert({
-        nama_sesi: (nama_sesi || 'Sesi Baru').substring(0, 100),
-        deskripsi: deskripsi ? deskripsi.substring(0, 500) : null,
+        nama_sesi: nama_sesi || 'Sesi Baru',
         tanggal: tanggal,
         waktu_mulai: waktu_mulai,
         waktu_selesai: waktu_selesai,
-        timezone: 'WIB',
-        lokasi: lokasi ? lokasi.substring(0, 100) : null,
-        tipe: (tipe || 'offline').substring(0, 10),
-        maksimal_peserta: parseInt(maksimal_peserta) || 100,
-        status: 'scheduled',
-        batas_absen_mulai: 30,
-        batas_absen_selesai: 15,
-        created_by: '00000000-0000-0000-0000-000000000000'
+        created_by: createdBy
       })
       .select()
       .single()
