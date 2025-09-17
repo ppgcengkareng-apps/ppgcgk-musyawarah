@@ -42,7 +42,8 @@ export async function POST(request: NextRequest) {
       waktu_selesai, 
       lokasi, 
       tipe, 
-      maksimal_peserta
+      maksimal_peserta,
+      peserta_ids
     } = body
 
     // Validate required fields
@@ -63,11 +64,12 @@ export async function POST(request: NextRequest) {
 
     const createdBy = adminUser?.id || '00000000-0000-0000-0000-000000000001'
 
-    // Insert with proper field constraints
+    // Insert session
     const { data: session, error: sessionError } = await (supabase as any)
       .from('sesi_musyawarah')
       .insert({
         nama_sesi: (nama_sesi || 'Sesi Baru').substring(0, 255),
+        deskripsi: deskripsi ? deskripsi.substring(0, 500) : null,
         tanggal: tanggal,
         waktu_mulai: waktu_mulai,
         waktu_selesai: waktu_selesai,
@@ -89,6 +91,25 @@ export async function POST(request: NextRequest) {
         { error: 'Gagal membuat sesi: ' + sessionError.message },
         { status: 500 }
       )
+    }
+
+    // Insert participants if provided
+    if (peserta_ids && Array.isArray(peserta_ids) && peserta_ids.length > 0) {
+      const sesiPesertaData = peserta_ids.map((peserta_id: string) => ({
+        sesi_id: session.id,
+        peserta_id,
+        wajib_hadir: true,
+        created_at: new Date().toISOString()
+      }))
+
+      const { error: relationError } = await (supabase as any)
+        .from('sesi_peserta')
+        .insert(sesiPesertaData)
+
+      if (relationError) {
+        console.error('Create session-participant relation error:', relationError)
+        // Don't fail the whole operation, just log the error
+      }
     }
 
     return NextResponse.json({

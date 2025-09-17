@@ -139,7 +139,10 @@ export default function CreateSession() {
       const response = await fetch('/api/sesi', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          peserta_ids: selectedParticipants
+        })
       })
 
       if (response.ok) {
