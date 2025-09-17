@@ -48,6 +48,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { nama, username, nomor_hp, jabatan, instansi, role } = body
 
+    console.log('Received data:', { nama, username, nomor_hp, jabatan, instansi, role })
+
     if (!nama || !username) {
       return NextResponse.json(
         { error: 'Nama dan username harus diisi' },
@@ -55,36 +57,61 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Validate role
+    const validRoles = ['peserta', 'sekretaris_ppg', 'admin_kmm', 'admin', 'super_admin']
+    const finalRole = role && validRoles.includes(role) ? role : 'peserta'
+
+    console.log('Final role:', finalRole)
+
     const supabase = createServerClient()
+
+    // Check if username already exists
+    const { data: existingUser } = await (supabase as any)
+      .from('peserta')
+      .select('id')
+      .eq('email', username)
+      .single()
+
+    if (existingUser) {
+      return NextResponse.json(
+        { error: 'Username sudah digunakan' },
+        { status: 400 }
+      )
+    }
 
     const { data: participant, error } = await (supabase as any)
       .from('peserta')
       .insert({
         nama,
         email: username, // Simpan username ke kolom email
-        nomor_hp,
-        jabatan,
-        instansi,
-        role: role || 'peserta',
-        password_hash: process.env.DEFAULT_PASSWORD || 'password123',
-        aktif: true
+        nomor_hp: nomor_hp || null,
+        jabatan: jabatan || null,
+        instansi: instansi || null,
+        role: finalRole,
+        password_hash: 'password123',
+        aktif: true,
+        email_verified: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       })
       .select()
       .single()
 
     if (error) {
+      console.error('Database error:', error)
       return NextResponse.json(
-        { error: 'Gagal menambah peserta' },
+        { error: `Gagal menambah peserta: ${error.message}` },
         { status: 500 }
       )
     }
 
+    console.log('Created participant:', participant)
     return NextResponse.json(participant)
 
   } catch (error) {
     console.error('Create participant error:', error)
     return NextResponse.json(
-      { error: 'Terjadi kesalahan sistem' },
+      { error: `Terjadi kesalahan sistem: ${error}` },
       { status: 500 }
     )
   }
