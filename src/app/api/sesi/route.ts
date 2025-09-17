@@ -63,11 +63,11 @@ export async function POST(request: NextRequest) {
 
     const createdBy = adminUser?.id || '00000000-0000-0000-0000-000000000001'
 
-    // Insert with required fields
+    // Insert with field length limits
     const { data: session, error: sessionError } = await (supabase as any)
       .from('sesi_musyawarah')
       .insert({
-        nama_sesi: nama_sesi || 'Sesi Baru',
+        nama_sesi: (nama_sesi || 'Sesi').substring(0, 10),
         tanggal: tanggal,
         waktu_mulai: waktu_mulai,
         waktu_selesai: waktu_selesai,
