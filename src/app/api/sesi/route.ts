@@ -53,18 +53,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Insert with proper field handling
+    // Insert with field length limits
     const { data: session, error: sessionError } = await (supabase as any)
       .from('sesi_musyawarah')
       .insert({
-        nama_sesi: nama_sesi || 'Sesi Baru',
-        deskripsi: deskripsi || null,
+        nama_sesi: (nama_sesi || 'Sesi Baru').substring(0, 100),
+        deskripsi: deskripsi ? deskripsi.substring(0, 500) : null,
         tanggal: tanggal,
         waktu_mulai: waktu_mulai,
         waktu_selesai: waktu_selesai,
-        timezone: 'Asia/Jakarta',
-        lokasi: lokasi || null,
-        tipe: tipe || 'offline',
+        timezone: 'WIB',
+        lokasi: lokasi ? lokasi.substring(0, 100) : null,
+        tipe: (tipe || 'offline').substring(0, 10),
         maksimal_peserta: parseInt(maksimal_peserta) || 100,
         status: 'scheduled',
         batas_absen_mulai: 30,
