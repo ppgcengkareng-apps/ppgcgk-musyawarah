@@ -41,6 +41,10 @@ export async function GET(
       .select('peserta_id, status_kehadiran, waktu_absen, catatan')
       .eq('sesi_id', id)
 
+    console.log('Session ID:', id)
+    console.log('Absensi Data:', absensiData)
+    console.log('Absensi Error:', absensiError)
+
     if (absensiError) {
       console.error('Error fetching attendance:', absensiError)
     }
