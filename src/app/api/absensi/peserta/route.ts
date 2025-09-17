@@ -14,11 +14,11 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Find peserta by username
+    // Find peserta by email (used as username)
     const { data: peserta, error: pesertaError } = await (supabase as any)
       .from('peserta')
-      .select('id, nama, username, bidang')
-      .eq('username', username)
+      .select('id, nama, email, jabatan')
+      .eq('email', username)
       .eq('role', 'peserta')
       .single()
 
