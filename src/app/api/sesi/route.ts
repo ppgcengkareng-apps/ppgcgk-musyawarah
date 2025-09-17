@@ -53,12 +53,23 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Extremely minimal insert with very short values
+    // Insert with proper field handling
     const { data: session, error: sessionError } = await (supabase as any)
       .from('sesi_musyawarah')
       .insert({
-        nama_sesi: nama_sesi?.substring(0, 8) || 'Sesi',
-        tanggal: tanggal || new Date().toISOString().split('T')[0]
+        nama_sesi: nama_sesi || 'Sesi Baru',
+        deskripsi: deskripsi || null,
+        tanggal: tanggal,
+        waktu_mulai: waktu_mulai,
+        waktu_selesai: waktu_selesai,
+        timezone: 'Asia/Jakarta',
+        lokasi: lokasi || null,
+        tipe: tipe || 'offline',
+        maksimal_peserta: parseInt(maksimal_peserta) || 100,
+        status: 'scheduled',
+        batas_absen_mulai: 30,
+        batas_absen_selesai: 15,
+        created_by: '00000000-0000-0000-0000-000000000000'
       })
       .select()
       .single()
