@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate status_kehadiran
-    const validStatuses = ['hadir', 'ghoib', 'izin', 'sakit']
+    const validStatuses = ['hadir', 'terlambat', 'izin', 'sakit']
     if (!validStatuses.includes(status_kehadiran)) {
       return NextResponse.json(
         { error: 'Status kehadiran tidak valid' },

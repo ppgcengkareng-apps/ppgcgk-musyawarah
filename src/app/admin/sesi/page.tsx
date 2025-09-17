@@ -156,7 +156,7 @@ export default function SessionManagement() {
                     Edit
                   </Button>
                 </Link>
-                <Link href={`/admin/sesi/${session.id}/absensi`}>
+                <Link href={`/absen/${session.id}`}>
                   <Button size="sm" className="w-full">
                     <ExternalLink className="w-4 h-4 mr-1" />
                     Absensi

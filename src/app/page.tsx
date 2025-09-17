@@ -19,12 +19,12 @@ export default function HomePage() {
                 <p className="text-sm text-gray-600">Penggerak Pembina Generus</p>
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+            <div className="flex space-x-2">
               <Link href="/admin/login">
-                <Button variant="outline" className="w-full sm:w-auto">Login Admin</Button>
+                <Button variant="outline">Login Admin</Button>
               </Link>
               <Link href="/absen">
-                <Button className="w-full sm:w-auto">Absensi Peserta</Button>
+                <Button>Absensi Peserta</Button>
               </Link>
             </div>
           </div>
