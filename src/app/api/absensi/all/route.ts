@@ -5,7 +5,7 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createServerClient()
 
-    const { data: attendanceRecords, error } = await supabase
+    const { data: attendanceRecords, error } = await (supabase as any)
       .from('absensi')
       .select(`
         id,
@@ -13,8 +13,8 @@ export async function GET(request: NextRequest) {
         status_kehadiran,
         catatan,
         ip_address,
-        peserta:peserta_id(nama, email, instansi),
-        sesi:sesi_id(nama_sesi, tanggal, waktu_mulai)
+        peserta!inner(nama, email, instansi),
+        sesi_musyawarah!inner(nama_sesi, tanggal, waktu_mulai)
       `)
       .order('waktu_absen', { ascending: false })
 

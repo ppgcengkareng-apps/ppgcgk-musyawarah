@@ -12,26 +12,18 @@ const formatTime = (time: string) => time
 const getStatusColor = (status: string) => {
   const colors = {
     'hadir': 'bg-green-100 text-green-800',
-    'terlambat': 'bg-yellow-100 text-yellow-800',
+    'ghoib': 'bg-red-100 text-red-800',
     'izin': 'bg-blue-100 text-blue-800',
-    'sakit': 'bg-red-100 text-red-800',
-    'draft': 'bg-gray-100 text-gray-800',
-    'pending_approval': 'bg-orange-100 text-orange-800',
-    'approved': 'bg-green-100 text-green-800',
-    'rejected': 'bg-red-100 text-red-800'
+    'sakit': 'bg-yellow-100 text-yellow-800'
   }
   return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800'
 }
 const getStatusText = (status: string) => {
   const texts = {
     'hadir': 'Hadir',
-    'terlambat': 'Terlambat',
+    'ghoib': 'Ghoib',
     'izin': 'Izin',
-    'sakit': 'Sakit',
-    'draft': 'Draft',
-    'pending_approval': 'Pending',
-    'approved': 'Disetujui',
-    'rejected': 'Ditolak'
+    'sakit': 'Sakit'
   }
   return texts[status as keyof typeof texts] || status
 }
@@ -43,7 +35,7 @@ interface AttendanceRecord {
     email: string
     instansi: string
   }
-  sesi: {
+  sesi_musyawarah: {
     nama_sesi: string
     tanggal: string
     waktu_mulai: string
@@ -69,7 +61,10 @@ export default function AbsensiManagement() {
       const response = await fetch('/api/absensi/all')
       if (response.ok) {
         const data = await response.json()
+        console.log('Attendance data:', data)
         setAttendanceRecords(data)
+      } else {
+        console.error('Response not ok:', response.status, response.statusText)
       }
     } catch (error) {
       console.error('Error fetching attendance:', error)
@@ -80,16 +75,16 @@ export default function AbsensiManagement() {
 
   const filteredRecords = attendanceRecords.filter(record =>
     record.peserta.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    record.sesi.nama_sesi.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    record.sesi_musyawarah.nama_sesi.toLowerCase().includes(searchTerm.toLowerCase()) ||
     record.peserta.instansi.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'hadir': return <CheckCircle className="w-4 h-4 text-green-600" />
-      case 'terlambat': return <Clock className="w-4 h-4 text-yellow-600" />
+      case 'ghoib': return <XCircle className="w-4 h-4 text-red-600" />
       case 'izin': return <AlertCircle className="w-4 h-4 text-blue-600" />
-      case 'sakit': return <XCircle className="w-4 h-4 text-red-600" />
+      case 'sakit': return <Clock className="w-4 h-4 text-yellow-600" />
       default: return <CheckCircle className="w-4 h-4 text-gray-600" />
     }
   }
@@ -97,11 +92,11 @@ export default function AbsensiManagement() {
   const getStats = () => {
     const total = filteredRecords.length
     const hadir = filteredRecords.filter(r => r.status_kehadiran === 'hadir').length
-    const terlambat = filteredRecords.filter(r => r.status_kehadiran === 'terlambat').length
+    const ghoib = filteredRecords.filter(r => r.status_kehadiran === 'ghoib').length
     const izin = filteredRecords.filter(r => r.status_kehadiran === 'izin').length
     const sakit = filteredRecords.filter(r => r.status_kehadiran === 'sakit').length
 
-    return { total, hadir, terlambat, izin, sakit }
+    return { total, hadir, ghoib, izin, sakit }
   }
 
   const stats = getStats()
@@ -156,10 +151,10 @@ export default function AbsensiManagement() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center">
-              <Clock className="w-8 h-8 text-yellow-600 mr-3" />
+              <XCircle className="w-8 h-8 text-red-600 mr-3" />
               <div>
-                <p className="text-2xl font-bold text-gray-900">{stats.terlambat}</p>
-                <p className="text-sm text-gray-600">Terlambat</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.ghoib}</p>
+                <p className="text-sm text-gray-600">Ghoib</p>
               </div>
             </div>
           </CardContent>
@@ -180,7 +175,7 @@ export default function AbsensiManagement() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center">
-              <XCircle className="w-8 h-8 text-red-600 mr-3" />
+              <Clock className="w-8 h-8 text-yellow-600 mr-3" />
               <div>
                 <p className="text-2xl font-bold text-gray-900">{stats.sakit}</p>
                 <p className="text-sm text-gray-600">Sakit</p>
@@ -237,10 +232,10 @@ export default function AbsensiManagement() {
                       </div>
                     </td>
                     <td className="py-3 px-4">
-                      <div className="font-medium text-gray-900">{record.sesi.nama_sesi}</div>
+                      <div className="font-medium text-gray-900">{record.sesi_musyawarah.nama_sesi}</div>
                     </td>
                     <td className="py-3 px-4 text-gray-600">
-                      {formatDate(record.sesi.tanggal)}
+                      {formatDate(record.sesi_musyawarah.tanggal)}
                     </td>
                     <td className="py-3 px-4 text-gray-600">
                       {new Date(record.waktu_absen).toLocaleTimeString('id-ID')} WIB
