@@ -99,25 +99,36 @@ export async function GET(
       )
     }
 
-    // Try to get participants - handle if table doesn't exist
+    // Get participants with raw SQL approach
     let participants = []
     try {
-      const { data: participantData } = await (supabase as any)
-        .from('sesi_peserta')
-        .select(`
-          peserta_id,
-          peserta:peserta_id (
-            id,
-            nama,
-            username,
-            bidang
-          )
-        `)
-        .eq('sesi_id', id)
+      const { data: participantData, error: participantError } = await (supabase as any)
+        .rpc('get_session_participants', { session_id: id })
       
-      participants = participantData || []
+      if (participantError) {
+        console.log('RPC error, trying direct query:', participantError)
+        
+        // Fallback to direct query
+        const { data: directData } = await (supabase as any)
+          .from('sesi_peserta')
+          .select('peserta_id')
+          .eq('sesi_id', id)
+        
+        console.log('Direct sesi_peserta data:', directData)
+        
+        if (directData && directData.length > 0) {
+          participants = directData.map(sp => ({
+            peserta_id: sp.peserta_id,
+            peserta: { id: sp.peserta_id, nama: 'Loading...', email: '' }
+          }))
+        }
+      } else {
+        participants = participantData || []
+      }
+      
+      console.log('Final participants:', participants)
     } catch (error) {
-      console.log('sesi_peserta table might not exist:', error)
+      console.log('Error fetching participants:', error)
       participants = []
     }
 
