@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Users, Calendar, FileText, CheckSquare, TrendingUp, Clock } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
+import { getUserFromStorage } from '@/lib/auth'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -29,6 +31,7 @@ interface RecentAttendance {
 }
 
 export default function AdminDashboard() {
+  const router = useRouter()
   const [stats, setStats] = useState<{
     totalParticipants: number
     totalSessions: number
@@ -47,8 +50,14 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Check if admin_kmm should be redirected
+    const user = getUserFromStorage()
+    if (user && user.role === 'admin_kmm') {
+      router.push('/admin/sesi')
+      return
+    }
     fetchDashboardData()
-  }, [])
+  }, [router])
 
   const fetchDashboardData = async () => {
     try {

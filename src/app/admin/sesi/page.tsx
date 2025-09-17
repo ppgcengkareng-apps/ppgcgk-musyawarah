@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Plus, Calendar, Clock, MapPin, Users, Edit, Trash2 } from 'lucide-react'
 import Link from 'next/link'
+import { getUserFromStorage, canEditOwnContent } from '@/lib/auth'
 // import { formatDate, formatTime, getStatusColor, getStatusText } from '@/lib/utils'
 
 const formatDate = (date: string) => new Date(date).toLocaleDateString('id-ID')
@@ -39,11 +40,18 @@ interface Session {
   status: string
   maksimal_peserta: number
   created_at: string
+  created_by: string
 }
 
 export default function SessionManagement() {
   const [sessions, setSessions] = useState<Session[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [currentUser, setCurrentUser] = useState<any>(null)
+
+  useEffect(() => {
+    const user = getUserFromStorage()
+    setCurrentUser(user)
+  }, [])
 
   useEffect(() => {
     fetchSessions()
@@ -150,27 +158,46 @@ export default function SessionManagement() {
               </div>
 
               <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t">
-                <Link href={`/admin/sesi/${session.id}/edit`}>
-                  <Button variant="outline" size="sm" className="w-full">
+                {currentUser && canEditOwnContent(currentUser.role, session.created_by, currentUser.id) ? (
+                  <Link href={`/admin/sesi/${session.id}/edit`}>
+                    <Button variant="outline" size="sm" className="w-full">
+                      <Edit className="w-4 h-4 mr-1" />
+                      Edit
+                    </Button>
+                  </Link>
+                ) : (
+                  <Button variant="outline" size="sm" className="w-full" disabled>
                     <Edit className="w-4 h-4 mr-1" />
                     Edit
                   </Button>
-                </Link>
+                )}
                 <Link href={`/admin/sesi/${session.id}/kehadiran`}>
                   <Button size="sm" className="w-full">
                     <Users className="w-4 h-4 mr-1" />
                     Kehadiran
                   </Button>
                 </Link>
-                <Button 
-                  variant="destructive" 
-                  size="sm" 
-                  className="w-full"
-                  onClick={() => handleDelete(session.id, session.nama_sesi)}
-                >
-                  <Trash2 className="w-4 h-4 mr-1" />
-                  Hapus
-                </Button>
+                {currentUser && canEditOwnContent(currentUser.role, session.created_by, currentUser.id) ? (
+                  <Button 
+                    variant="destructive" 
+                    size="sm" 
+                    className="w-full"
+                    onClick={() => handleDelete(session.id, session.nama_sesi)}
+                  >
+                    <Trash2 className="w-4 h-4 mr-1" />
+                    Hapus
+                  </Button>
+                ) : (
+                  <Button 
+                    variant="destructive" 
+                    size="sm" 
+                    className="w-full"
+                    disabled
+                  >
+                    <Trash2 className="w-4 h-4 mr-1" />
+                    Hapus
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>

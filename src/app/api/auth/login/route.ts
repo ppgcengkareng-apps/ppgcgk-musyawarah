@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check admin role
-    if (!['admin', 'super_admin', 'sekretaris_ppg'].includes(userData.role)) {
+    if (!['admin', 'super_admin', 'sekretaris_ppg', 'admin_kmm'].includes(userData.role)) {
       return NextResponse.json(
         { error: 'Akses ditolak. Anda bukan admin.' },
         { status: 403 }

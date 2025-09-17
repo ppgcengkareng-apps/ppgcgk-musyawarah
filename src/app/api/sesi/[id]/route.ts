@@ -16,10 +16,10 @@ export async function DELETE(
       )
     }
 
-    // Check if session exists
+    // Check if session exists and get ownership info
     const { data: existingSession, error: checkError } = await (supabase as any)
       .from('sesi_musyawarah')
-      .select('id, nama_sesi')
+      .select('id, nama_sesi, created_by')
       .eq('id', id)
       .single()
 
@@ -156,6 +156,20 @@ export async function PUT(
     const { id } = params
     const body = await request.json()
     const { peserta_ids, ...sessionData } = body
+
+    // Check if session exists and get ownership info
+    const { data: existingSession, error: checkError } = await (supabase as any)
+      .from('sesi_musyawarah')
+      .select('id, created_by')
+      .eq('id', id)
+      .single()
+
+    if (checkError || !existingSession) {
+      return NextResponse.json(
+        { error: 'Sesi tidak ditemukan' },
+        { status: 404 }
+      )
+    }
 
     // Update session data
     const { data, error } = await (supabase as any)

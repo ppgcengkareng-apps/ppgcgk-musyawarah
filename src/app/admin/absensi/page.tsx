@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Search, Calendar, Users, CheckCircle, Clock, AlertCircle, XCircle } from 'lucide-react'
+import RoleGuard from '@/components/admin/role-guard'
 // import { formatDate, formatTime, getStatusColor, getStatusText } from '@/lib/utils'
 
 const formatDate = (date: string) => new Date(date).toLocaleDateString('id-ID')
@@ -113,7 +114,8 @@ export default function AbsensiManagement() {
   }
 
   return (
-    <div className="p-6">
+    <RoleGuard allowedRoles={['admin', 'super_admin', 'sekretaris_ppg']}>
+      <div className="p-6">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Manajemen Absensi</h1>
@@ -270,6 +272,7 @@ export default function AbsensiManagement() {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </RoleGuard>
   )
 }

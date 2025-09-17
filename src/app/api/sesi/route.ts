@@ -54,15 +54,26 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get first admin user ID for created_by
-    const { data: adminUser } = await (supabase as any)
-      .from('peserta')
-      .select('id')
-      .in('role', ['admin', 'super_admin'])
-      .limit(1)
-      .single()
-
-    const createdBy = adminUser?.id || '00000000-0000-0000-0000-000000000001'
+    // Get current user from request headers or use default
+    const authHeader = request.headers.get('authorization')
+    let createdBy = '00000000-0000-0000-0000-000000000001' // default
+    
+    // Try to get current user from Supabase auth
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: userData } = await (supabase as any)
+          .from('peserta')
+          .select('id')
+          .eq('email', user.email)
+          .single()
+        if (userData) {
+          createdBy = userData.id
+        }
+      }
+    } catch (authError) {
+      console.log('Auth error, using default created_by')
+    }
 
     // Insert session
     const { data: session, error: sessionError } = await (supabase as any)

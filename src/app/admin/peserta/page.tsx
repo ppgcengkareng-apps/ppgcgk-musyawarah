@@ -8,6 +8,7 @@ import { Plus, Search, Edit, Trash2, X } from 'lucide-react'
 import { ToastContainer } from '@/components/ui/toast'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
+import RoleGuard from '@/components/admin/role-guard'
 
 interface Participant {
   id: string
@@ -55,6 +56,7 @@ export default function ParticipantManagement() {
     const roles = {
       'super_admin': 'Super Admin',
       'admin': 'Admin',
+      'admin_kmm': 'Admin KMM',
       'sekretaris_ppg': 'Sekretaris PPG',
       'peserta': 'Peserta'
     }
@@ -65,6 +67,7 @@ export default function ParticipantManagement() {
     const colors = {
       'super_admin': 'bg-red-100 text-red-800',
       'admin': 'bg-blue-100 text-blue-800',
+      'admin_kmm': 'bg-indigo-100 text-indigo-800',
       'sekretaris_ppg': 'bg-purple-100 text-purple-800',
       'peserta': 'bg-green-100 text-green-800'
     }
@@ -145,7 +148,8 @@ export default function ParticipantManagement() {
   }
 
   return (
-    <div className="p-6">
+    <RoleGuard allowedRoles={['admin', 'super_admin', 'sekretaris_ppg']}>
+      <div className="p-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
@@ -303,6 +307,7 @@ export default function ParticipantManagement() {
                 >
                   <option value="peserta">Peserta</option>
                   <option value="sekretaris_ppg">Sekretaris PPG</option>
+                  <option value="admin_kmm">Admin KMM</option>
                   <option value="admin">Admin</option>
                   <option value="super_admin">Super Admin</option>
                 </select>
@@ -330,7 +335,8 @@ export default function ParticipantManagement() {
           </div>
         </div>
       )}
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
-    </div>
+        <ToastContainer toasts={toasts} onRemove={removeToast} />
+      </div>
+    </RoleGuard>
   )
 }

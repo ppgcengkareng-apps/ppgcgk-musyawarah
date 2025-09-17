@@ -15,6 +15,7 @@ import {
   Activity
 } from 'lucide-react'
 import { exportToExcel, exportToPDF } from '@/lib/export'
+import RoleGuard from '@/components/admin/role-guard'
 
 export default function LaporanManagement() {
   const [stats, setStats] = useState({
@@ -83,7 +84,8 @@ export default function LaporanManagement() {
   }
 
   return (
-    <div className="p-6">
+    <RoleGuard allowedRoles={['admin', 'super_admin', 'sekretaris_ppg']}>
+      <div className="p-6">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Laporan & Analitik</h1>
@@ -438,6 +440,7 @@ export default function LaporanManagement() {
           </CardContent>
         </Card>
       </div>
-    </div>
+      </div>
+    </RoleGuard>
   )
 }

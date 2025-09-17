@@ -66,9 +66,19 @@ export default function AdminNavigation({ user }: AdminNavigationProps) {
     const roles = {
       'super_admin': 'Super Admin',
       'admin': 'Admin',
-      'sekretaris_ppg': 'Sekretaris PPG'
+      'sekretaris_ppg': 'Sekretaris PPG',
+      'admin_kmm': 'Admin KMM'
     }
     return roles[role as keyof typeof roles] || role
+  }
+
+  const getFilteredNavigation = (userRole: string) => {
+    if (userRole === 'admin_kmm') {
+      return navigation.filter(item => 
+        ['Sesi Musyawarah', 'Notulensi'].includes(item.name)
+      )
+    }
+    return navigation
   }
 
   return (
@@ -126,7 +136,7 @@ export default function AdminNavigation({ user }: AdminNavigationProps) {
 
           {/* Navigation */}
           <nav className="flex-1 px-4 py-4 space-y-1">
-            {navigation.map((item) => {
+            {getFilteredNavigation(user.role).map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
               return (
                 <Link
