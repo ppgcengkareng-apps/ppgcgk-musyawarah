@@ -164,6 +164,7 @@ export default function TambahPeserta() {
                   >
                     <option value="peserta">Peserta</option>
                     <option value="sekretaris_ppg">Sekretaris PPG</option>
+                    <option value="admin_kmm">Admin KMM</option>
                     <option value="admin">Admin</option>
                     <option value="super_admin">Super Admin</option>
                   </select>
