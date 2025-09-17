@@ -9,30 +9,23 @@ export async function GET(
     const supabase = createServerClient()
     const { id } = params
 
-    // Get all participants assigned to this session
+    // Get all participants assigned to this session with details
     const { data: sesiPeserta, error: sesiPesertaError } = await (supabase as any)
       .from('sesi_peserta')
-      .select('peserta_id')
+      .select(`
+        peserta_id,
+        peserta!inner (
+          id,
+          nama,
+          email,
+          jabatan
+        )
+      `)
       .eq('sesi_id', id)
-    
-    if (sesiPesertaError || !sesiPeserta) {
-      console.error('Error fetching session participants:', sesiPesertaError)
-      return NextResponse.json([])
-    }
-
-    // Get participant details
-    const pesertaIds = sesiPeserta.map((sp: any) => sp.peserta_id)
-    const { data: pesertaData, error: pesertaError } = await (supabase as any)
-      .from('peserta')
-      .select('id, nama, email, jabatan')
-      .in('id', pesertaIds)
 
     if (sesiPesertaError) {
       console.error('Error fetching session participants:', sesiPesertaError)
-      return NextResponse.json(
-        { error: 'Gagal memuat data peserta' },
-        { status: 500 }
-      )
+      return NextResponse.json([])
     }
 
     // Get attendance records for this session
@@ -50,11 +43,11 @@ export async function GET(
     }
 
     // Combine participant data with attendance status
-    const attendanceData = pesertaData?.map((peserta: any) => {
-      const attendance = absensiData?.find((a: any) => a.peserta_id === peserta.id)
+    const attendanceData = sesiPeserta?.map((sp: any) => {
+      const attendance = absensiData?.find((a: any) => a.peserta_id === sp.peserta.id)
       
       return {
-        peserta: peserta,
+        peserta: sp.peserta,
         status_kehadiran: attendance?.status_kehadiran || null,
         waktu_absen: attendance?.waktu_absen || null,
         catatan: attendance?.catatan || null
