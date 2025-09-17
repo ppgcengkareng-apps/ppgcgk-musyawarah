@@ -23,8 +23,8 @@ export default function HomePage() {
               <Link href="/admin/login">
                 <Button variant="outline">Login Admin</Button>
               </Link>
-              <Link href="/admin/login">
-                <Button>Login Peserta</Button>
+              <Link href="/absen">
+                <Button>Absensi Peserta</Button>
               </Link>
             </div>
           </div>
@@ -102,27 +102,7 @@ export default function HomePage() {
           </Card>
         </div>
 
-        {/* Quick Access */}
-        <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">Akses Cepat</h3>
-          <p className="text-gray-600 mb-6">
-            Pilih peran Anda untuk mengakses sistem musyawarah PPG
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/admin/login">
-              <Button size="lg" className="w-full sm:w-auto">
-                <Users className="w-5 h-5 mr-2" />
-                Login sebagai Admin
-              </Button>
-            </Link>
-            <Link href="/admin/login">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                <FileText className="w-5 h-5 mr-2" />
-                Login sebagai Peserta
-              </Button>
-            </Link>
-          </div>
-        </div>
+
 
         {/* System Info */}
         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 text-center">

@@ -208,7 +208,7 @@ export default function PublicAttendancePage() {
           <CardHeader className="bg-blue-600 text-white rounded-t-lg">
             <CardTitle className="text-center">
               <Users className="w-8 h-8 mx-auto mb-2" />
-              Absensi PPG Daerah
+              ABSENSI MUSYAWARAH
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">

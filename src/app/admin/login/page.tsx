@@ -56,7 +56,7 @@ export default function AdminLoginPage() {
             </div>
             <CardTitle className="text-2xl font-bold">Login Admin</CardTitle>
             <CardDescription>
-              Masuk ke sistem manajemen musyawarah PPG
+              Masuk ke sistem manajemen musyawarah
             </CardDescription>
           </CardHeader>
           <CardContent>
