@@ -42,13 +42,40 @@ Sistem manajemen musyawarah Program Penggerak Pembina Generasi dengan fitur notu
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: Next.js 13+ (App Router), TypeScript, Tailwind CSS
+- **Frontend**: Next.js 14+ (App Router), TypeScript, Tailwind CSS
 - **UI Components**: shadcn/ui, Radix UI
 - **Backend**: Next.js API Routes, Supabase
 - **Database**: PostgreSQL (Supabase)
 - **Authentication**: Custom Auth System
 - **Real-time**: Supabase Realtime
 - **Deployment**: Vercel
+
+## 📁 Struktur Folder
+
+```
+src/
+├── app/
+│   ├── absen/                    # Halaman absensi publik
+│   ├── admin/                   # Dashboard admin
+│   │   ├── login/               # Login admin
+│   │   ├── sesi/                # Manajemen sesi
+│   │   │   ├── buat/            # Buat sesi baru
+│   │   │   └── [id]/edit/       # Edit sesi
+│   │   └── notulensi/           # Manajemen notulensi
+│   └── api/                     # API endpoints
+│       ├── auth/                # Authentication
+│       ├── sesi/                # Sesi CRUD
+│       ├── peserta/             # Peserta management
+│       └── absensi/             # Absensi system
+├── components/
+│   ├── admin/                   # Admin components
+│   └── ui/                      # Reusable UI components
+├── lib/
+│   ├── supabase/                # Supabase client config
+│   └── utils.ts                 # Utility functions
+└── types/
+    └── database.ts              # TypeScript types
+```
 
 ## 📱 Flow Aplikasi
 
@@ -146,52 +173,75 @@ Proses Absensi:
 ### Tabel Utama
 ```sql
 -- Tabel peserta
-peserta (
-  id UUID PRIMARY KEY,
-  nama VARCHAR(255),
-  email VARCHAR(255), -- digunakan sebagai username
-  role VARCHAR(50), -- 'admin', 'peserta'
+CREATE TABLE peserta (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  nama VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL, -- digunakan sebagai username
+  nomor_hp VARCHAR(20),
   jabatan VARCHAR(255),
   instansi VARCHAR(255),
-  aktif BOOLEAN
-)
+  foto_url VARCHAR(500),
+  role VARCHAR(50) DEFAULT 'peserta', -- 'peserta', 'sekretaris_ppg', 'admin', 'super_admin'
+  password_hash VARCHAR(255),
+  email_verified BOOLEAN DEFAULT false,
+  aktif BOOLEAN DEFAULT true,
+  last_login TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 
 -- Tabel sesi musyawarah
-sesi_musyawarah (
-  id UUID PRIMARY KEY,
-  nama_sesi VARCHAR(255),
+CREATE TABLE sesi_musyawarah (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  nama_sesi VARCHAR(255) NOT NULL,
   deskripsi TEXT,
-  tanggal DATE,
-  waktu_mulai TIME,
-  waktu_selesai TIME,
-  timezone VARCHAR(10),
+  tanggal DATE NOT NULL,
+  waktu_mulai TIME NOT NULL,
+  waktu_selesai TIME NOT NULL,
+  timezone VARCHAR(10) DEFAULT 'WIB',
   lokasi VARCHAR(200),
-  tipe VARCHAR(20), -- 'offline', 'online', 'hybrid'
-  status VARCHAR(20), -- 'scheduled', 'active', 'completed'
-  maksimal_peserta INTEGER,
-  created_by UUID REFERENCES peserta(id)
-)
+  tipe VARCHAR(20) DEFAULT 'offline', -- 'offline', 'online', 'hybrid'
+  maksimal_peserta INTEGER DEFAULT 100,
+  status VARCHAR(20) DEFAULT 'scheduled', -- 'scheduled', 'active', 'completed', 'cancelled'
+  batas_absen_mulai INTEGER DEFAULT 30, -- menit sebelum mulai
+  batas_absen_selesai INTEGER DEFAULT 15, -- menit setelah mulai
+  link_pendek VARCHAR(100),
+  created_by UUID NOT NULL REFERENCES peserta(id),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 
 -- Tabel relasi sesi-peserta
-sesi_peserta (
-  id UUID PRIMARY KEY,
-  sesi_id UUID REFERENCES sesi_musyawarah(id),
-  peserta_id UUID REFERENCES peserta(id),
+CREATE TABLE sesi_peserta (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  sesi_id UUID NOT NULL REFERENCES sesi_musyawarah(id) ON DELETE CASCADE,
+  peserta_id UUID NOT NULL REFERENCES peserta(id) ON DELETE CASCADE,
   wajib_hadir BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(sesi_id, peserta_id)
-)
+);
 
 -- Tabel absensi
-absensi (
-  id UUID PRIMARY KEY,
-  sesi_id UUID REFERENCES sesi_musyawarah(id),
-  peserta_id UUID REFERENCES peserta(id),
-  status_kehadiran VARCHAR(20), -- 'hadir', 'terlambat', 'izin', 'sakit'
+CREATE TABLE absensi (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  peserta_id UUID NOT NULL REFERENCES peserta(id),
+  sesi_id UUID NOT NULL REFERENCES sesi_musyawarah(id),
+  waktu_absen TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  status_kehadiran VARCHAR(20) DEFAULT 'hadir', -- 'hadir', 'terlambat', 'izin', 'sakit'
   catatan TEXT,
-  waktu_absen TIMESTAMP,
   ip_address INET,
-  user_agent TEXT
-)
+  user_agent TEXT,
+  lokasi_koordinat POINT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Index untuk performa
+CREATE INDEX idx_sesi_peserta_sesi_id ON sesi_peserta(sesi_id);
+CREATE INDEX idx_sesi_peserta_peserta_id ON sesi_peserta(peserta_id);
+CREATE INDEX idx_absensi_sesi_id ON absensi(sesi_id);
+CREATE INDEX idx_absensi_peserta_id ON absensi(peserta_id);
+CREATE INDEX idx_peserta_email ON peserta(email);
+CREATE INDEX idx_peserta_role ON peserta(role);
 ```
 
 ## 📦 Instalasi & Setup
@@ -242,6 +292,34 @@ CREATE INDEX idx_sesi_peserta_peserta_id ON sesi_peserta(peserta_id);
 npm run dev
 ```
 
+### Scripts Available
+```bash
+npm run dev          # Development server
+npm run build        # Production build
+npm run start        # Production server
+npm run lint         # ESLint check
+npm run type-check   # TypeScript check
+```
+
+### Dependencies Utama
+- **Next.js 14+** - React framework dengan App Router
+- **TypeScript** - Type safety dan development experience
+- **Tailwind CSS** - Utility-first CSS framework
+- **Supabase** - Backend as a Service (Database + Auth)
+- **Radix UI** - Headless UI components
+- **Lucide React** - Icon library
+- **React Hook Form + Zod** - Form handling dan validation
+- **Recharts** - Chart library untuk dashboard
+- **XLSX & jsPDF** - Export functionality
+
+## 🔧 Troubleshooting
+
+### Common Issues
+1. **Database Connection Error**: Pastikan environment variables Supabase sudah benar
+2. **Build Error**: Jalankan `npm run type-check` untuk cek TypeScript errors
+3. **Styling Issues**: Pastikan Tailwind CSS sudah ter-configure dengan benar
+4. **API Errors**: Cek Supabase RLS policies dan table permissions
+
 ## 🚀 Deployment
 
 ### Vercel Deployment
@@ -268,10 +346,12 @@ npm run dev
 - [x] Mobile responsive design
 
 ### 🚧 Fitur Dalam Pengembangan
-- [ ] Sistem notulensi digital
-- [ ] Dashboard analytics
-- [ ] Export laporan
-- [ ] Sistem notifikasi
+- [ ] Sistem notulensi digital dengan approval workflow
+- [ ] Dashboard analytics dengan charts
+- [ ] Export laporan (PDF/Excel)
+- [ ] Sistem komentar real-time
+- [ ] Login dan dashboard peserta
+- [ ] Email notifications
 - [ ] Manajemen user admin
 
 ### 🎯 Roadmap Selanjutnya
