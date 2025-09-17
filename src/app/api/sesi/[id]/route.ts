@@ -117,7 +117,7 @@ export async function GET(
         console.log('Direct sesi_peserta data:', directData)
         
         if (directData && directData.length > 0) {
-          participants = directData.map(sp => ({
+          participants = directData.map((sp: any) => ({
             peserta_id: sp.peserta_id,
             peserta: { id: sp.peserta_id, nama: 'Loading...', email: '' }
           }))
