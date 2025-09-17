@@ -63,14 +63,21 @@ export async function POST(request: NextRequest) {
 
     const createdBy = adminUser?.id || '00000000-0000-0000-0000-000000000001'
 
-    // Insert with field length limits
+    // Insert with proper field constraints
     const { data: session, error: sessionError } = await (supabase as any)
       .from('sesi_musyawarah')
       .insert({
-        nama_sesi: (nama_sesi || 'Sesi').substring(0, 10),
+        nama_sesi: (nama_sesi || 'Sesi Baru').substring(0, 255),
         tanggal: tanggal,
         waktu_mulai: waktu_mulai,
         waktu_selesai: waktu_selesai,
+        timezone: 'WIB',
+        lokasi: lokasi ? lokasi.substring(0, 200) : null,
+        tipe: (tipe || 'offline').substring(0, 20),
+        status: 'scheduled',
+        maksimal_peserta: parseInt(maksimal_peserta) || 100,
+        batas_absen_mulai: 30,
+        batas_absen_selesai: 15,
         created_by: createdBy
       })
       .select()
