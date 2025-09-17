@@ -41,6 +41,13 @@ export async function GET(
     console.log('Session ID:', id)
     console.log('Absensi Data:', absensiData)
     console.log('Absensi Error:', absensiError)
+    
+    // Manual test query
+    const { data: testData } = await (supabase as any)
+      .from('absensi')
+      .select('*')
+      .limit(5)
+    console.log('Test absensi table:', testData)
 
     if (absensiError) {
       console.error('Error fetching attendance:', absensiError)
