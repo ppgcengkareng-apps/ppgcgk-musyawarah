@@ -90,17 +90,30 @@ export default function KehadiranPage() {
 
       // Fetch kehadiran data
       const kehadiranResponse = await fetch(`/api/absensi/sesi/${sesiId}`)
+      let kehadiranData = []
       if (kehadiranResponse.ok) {
-        const kehadiranData = await kehadiranResponse.json()
+        kehadiranData = await kehadiranResponse.json()
         setAbsensi(kehadiranData)
       }
 
-      // Fetch all peserta for this sesi
+      // Fetch peserta terdaftar
       const pesertaResponse = await fetch(`/api/sesi/${sesiId}/peserta`)
+      let pesertaTerdaftar = []
       if (pesertaResponse.ok) {
-        const pesertaData = await pesertaResponse.json()
-        setAllPeserta(pesertaData)
+        pesertaTerdaftar = await pesertaResponse.json()
       }
+
+      // Gabungkan dengan peserta yang sudah absen tapi tidak terdaftar
+      const pesertaAbsen = kehadiranData?.map((a: any) => a.peserta).filter(Boolean) || []
+      const allPesertaMap = new Map()
+      
+      // Tambahkan peserta terdaftar
+      pesertaTerdaftar.forEach((p: any) => allPesertaMap.set(p.id, p))
+      
+      // Tambahkan peserta yang sudah absen
+      pesertaAbsen.forEach((p: any) => allPesertaMap.set(p.id, p))
+      
+      setAllPeserta(Array.from(allPesertaMap.values()))
     } catch (error) {
       console.error('Error fetching data:', error)
     } finally {
