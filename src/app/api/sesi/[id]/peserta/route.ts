@@ -10,7 +10,7 @@ export async function GET(
     const supabase = createServerClient()
 
     // Get peserta assigned to this sesi
-    const { data: peserta, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('sesi_peserta')
       .select(`
         peserta:peserta_id (
@@ -32,7 +32,7 @@ export async function GET(
     }
 
     // Extract peserta data from the nested structure
-    const pesertaList = peserta?.map(item => item.peserta).filter(Boolean) || []
+    const pesertaList = data?.map((item: any) => item.peserta).filter(Boolean) || []
 
     return NextResponse.json(pesertaList)
 
