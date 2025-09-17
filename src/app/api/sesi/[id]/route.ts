@@ -85,12 +85,26 @@ export async function GET(
     const supabase = createServerClient()
     const { id } = params
 
-    // First try to get session with participants
-    let { data, error } = await (supabase as any)
+    // Get session data first
+    const { data: sessionData, error: sessionError } = await (supabase as any)
       .from('sesi_musyawarah')
-      .select(`
-        *,
-        sesi_peserta (
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (sessionError) {
+      return NextResponse.json(
+        { error: 'Sesi tidak ditemukan' },
+        { status: 404 }
+      )
+    }
+
+    // Try to get participants - handle if table doesn't exist
+    let participants = []
+    try {
+      const { data: participantData } = await (supabase as any)
+        .from('sesi_peserta')
+        .select(`
           peserta_id,
           peserta:peserta_id (
             id,
@@ -98,41 +112,20 @@ export async function GET(
             username,
             bidang
           )
-        )
-      `)
-      .eq('id', id)
-      .single()
-
-    // If sesi_peserta table doesn't exist, get session without participants
-    if (error && error.code === '42P01') {
-      const { data: sessionData, error: sessionError } = await (supabase as any)
-        .from('sesi_musyawarah')
-        .select('*')
-        .eq('id', id)
-        .single()
-
-      if (sessionError) {
-        return NextResponse.json(
-          { error: 'Sesi tidak ditemukan' },
-          { status: 404 }
-        )
-      }
-
-      // Return session without participants
-      return NextResponse.json({
-        ...sessionData,
-        sesi_peserta: []
-      })
+        `)
+        .eq('sesi_id', id)
+      
+      participants = participantData || []
+    } catch (error) {
+      console.log('sesi_peserta table might not exist:', error)
+      participants = []
     }
 
-    if (error) {
-      return NextResponse.json(
-        { error: 'Sesi tidak ditemukan' },
-        { status: 404 }
-      )
-    }
-
-    return NextResponse.json(data)
+    // Return session with participants
+    return NextResponse.json({
+      ...sessionData,
+      sesi_peserta: participants
+    })
 
   } catch (error) {
     console.error('Get session API error:', error)
