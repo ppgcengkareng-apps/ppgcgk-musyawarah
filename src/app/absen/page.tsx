@@ -97,7 +97,7 @@ export default function PublicAttendancePage() {
     
     const badges = {
       hadir: <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">Hadir</span>,
-      terlambat: <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium">Terlambat</span>,
+      ghoib: <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium">Ghoib</span>,
       izin: <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">Izin</span>,
       sakit: <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium">Sakit</span>
     }
@@ -143,7 +143,7 @@ export default function PublicAttendancePage() {
                   <div className="space-y-2">
                     {[
                       { value: 'hadir', label: 'Hadir', color: 'border-green-200 bg-green-50' },
-                      { value: 'terlambat', label: 'Terlambat', color: 'border-yellow-200 bg-yellow-50' },
+                      { value: 'ghoib', label: 'Ghoib', color: 'border-red-200 bg-red-50' },
                       { value: 'izin', label: 'Izin', color: 'border-blue-200 bg-blue-50' },
                       { value: 'sakit', label: 'Sakit', color: 'border-red-200 bg-red-50' }
                     ].map((option) => (
