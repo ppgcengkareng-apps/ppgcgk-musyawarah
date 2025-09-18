@@ -9,26 +9,34 @@ export async function GET(
     const sesiId = params.id
     const supabase = createServerClient()
 
+    console.log('=== ABSENSI API DEBUG ===')
     console.log('Fetching absensi for sesi:', sesiId)
+    console.log('Timestamp:', new Date().toISOString())
     
-    // Get attendance data with explicit casting
-    const { data: absensiData, error: absensiError } = await (supabase as any)
+    // Test connection first
+    const { data: testData, error: testError } = await supabase
+      .from('absensi')
+      .select('count')
+      .eq('sesi_id', sesiId)
+    
+    console.log('Connection test result:', { testData, testError })
+    
+    // Get attendance data with explicit UUID casting
+    const { data: absensiData, error: absensiError } = await supabase
       .from('absensi')
       .select('id, peserta_id, status_kehadiran, waktu_absen, catatan')
       .eq('sesi_id', sesiId)
       .order('waktu_absen', { ascending: true })
     
-    console.log('Raw absensi data count:', absensiData?.length)
-    console.log('Raw absensi data:', absensiData)
+    console.log('Raw absensi query result:')
+    console.log('- Count:', absensiData?.length || 0)
+    console.log('- Error:', absensiError)
+    console.log('- Data:', JSON.stringify(absensiData, null, 2))
     
     if (absensiError) {
-      console.error('Absensi error:', absensiError)
-    }
-
-    if (absensiError) {
-      console.error('Error fetching attendance:', absensiError)
+      console.error('Absensi query error:', absensiError)
       return NextResponse.json(
-        { error: 'Gagal mengambil data kehadiran' },
+        { error: 'Gagal mengambil data kehadiran', details: absensiError },
         { status: 500 }
       )
     }
@@ -37,11 +45,16 @@ export async function GET(
     const absensiWithPeserta = []
     if (absensiData && absensiData.length > 0) {
       const pesertaIds = absensiData.map((a: any) => a.peserta_id)
+      console.log('Fetching peserta for IDs:', pesertaIds)
       
-      const { data: pesertaData } = await (supabase as any)
+      const { data: pesertaData, error: pesertaError } = await supabase
         .from('peserta')
         .select('id, nama, email, jabatan, instansi')
         .in('id', pesertaIds)
+      
+      console.log('Peserta query result:')
+      console.log('- Count:', pesertaData?.length || 0)
+      console.log('- Error:', pesertaError)
       
       // Combine absensi with peserta data
       for (const absen of absensiData) {
@@ -53,15 +66,20 @@ export async function GET(
       }
     }
 
+    console.log('Final result count:', absensiWithPeserta.length)
+    console.log('=== END ABSENSI API DEBUG ===')
+
     // Set cache headers to prevent caching
     const response = NextResponse.json(absensiWithPeserta)
-    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate')
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+    response.headers.set('Pragma', 'no-cache')
+    response.headers.set('Expires', '0')
     return response
 
   } catch (error) {
     console.error('API Error:', error)
     return NextResponse.json(
-      { error: 'Terjadi kesalahan sistem' },
+      { error: 'Terjadi kesalahan sistem', details: error },
       { status: 500 }
     )
   }

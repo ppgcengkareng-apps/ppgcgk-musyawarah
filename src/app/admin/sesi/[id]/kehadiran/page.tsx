@@ -88,36 +88,22 @@ export default function KehadiranPage() {
         setSesi(sesiData)
       }
 
-      // Fetch kehadiran data with manual Arestu fix
+      // Fetch kehadiran data - NO MANUAL FIX, PURE DATABASE
       const timestamp = new Date().getTime()
-      const kehadiranResponse = await fetch(`/api/absensi/sesi/${sesiId}?t=${timestamp}`, { cache: 'no-store' })
+      const kehadiranResponse = await fetch(`/api/absensi/sesi/${sesiId}?t=${timestamp}`, { 
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      })
       let kehadiranData = []
       if (kehadiranResponse.ok) {
         kehadiranData = await kehadiranResponse.json()
-        
-        // Manual fix: Add Arestu if missing
-        const arestuId = '6d07b1f7-30b3-4d63-b710-42701c809b9a'
-        const hasArestu = kehadiranData.some((k: any) => k.peserta_id === arestuId)
-        
-        if (!hasArestu) {
-          console.log('Adding Arestu manually')
-          kehadiranData.push({
-            id: 'baa90538-202b-4fc6-a0ed-9e1cbf9c485a',
-            peserta_id: arestuId,
-            status_kehadiran: 'hadir',
-            waktu_absen: '2025-09-18T09:32:29.633+00:00',
-            catatan: 'ok',
-            peserta: {
-              id: arestuId,
-              nama: 'Arestu Wibowo',
-              email: 'Arestu',
-              jabatan: 'Ketua KMM Daerah',
-              instansi: 'Bid. Muda-Mudi'
-            }
-          })
-        }
-        
+        console.log('PURE DATABASE kehadiran data:', kehadiranData)
         setAbsensi(kehadiranData)
+      } else {
+        console.error('Failed to fetch kehadiran:', kehadiranResponse.status, kehadiranResponse.statusText)
       }
 
       // Fetch peserta terdaftar with timestamp
