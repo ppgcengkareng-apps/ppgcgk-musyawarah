@@ -43,7 +43,8 @@ export async function POST(request: NextRequest) {
       lokasi, 
       tipe, 
       maksimal_peserta,
-      peserta_ids
+      peserta_ids,
+      created_by_id // Get from frontend
     } = body
 
     // Validate required fields
@@ -54,25 +55,53 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get current user from request headers or use default
-    const authHeader = request.headers.get('authorization')
-    let createdBy = '00000000-0000-0000-0000-000000000001' // default
+    // Get created_by from request body or find first admin
+    let createdBy = created_by_id
     
-    // Try to get current user from Supabase auth
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        const { data: userData } = await (supabase as any)
+    if (!createdBy) {
+      // Find first admin user as fallback
+      const { data: adminUser, error: adminError } = await (supabase as any)
+        .from('peserta')
+        .select('id')
+        .in('role', ['admin', 'super_admin', 'admin_kmm'])
+        .eq('aktif', true)
+        .limit(1)
+        .single()
+      
+      if (adminUser) {
+        createdBy = adminUser.id
+      } else {
+        // Create default admin if none exists
+        const { data: newAdmin, error: createError } = await (supabase as any)
           .from('peserta')
+          .insert({
+            nama: 'Admin PPG',
+            email: 'admin@ppg.id',
+            role: 'admin',
+            password_hash: 'admin123',
+            aktif: true,
+            created_at: new Date().toISOString()
+          })
           .select('id')
-          .eq('email', user.email)
           .single()
-        if (userData) {
-          createdBy = userData.id
+        
+        if (newAdmin) {
+          createdBy = newAdmin.id
+        } else {
+          return NextResponse.json(
+            { error: 'Gagal membuat admin default: ' + (createError?.message || 'Unknown error') },
+            { status: 500 }
+          )
         }
       }
-    } catch (authError) {
-      console.log('Auth error, using default created_by')
+    }
+
+    // Final validation
+    if (!createdBy) {
+      return NextResponse.json(
+        { error: 'Tidak dapat menentukan pembuat sesi' },
+        { status: 400 }
+      )
     }
 
     // Insert session

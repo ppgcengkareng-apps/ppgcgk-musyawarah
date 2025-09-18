@@ -128,12 +128,33 @@ export default function CreateSession() {
     e.preventDefault()
     setIsLoading(true)
 
-    // Temporarily skip participant validation
-    // if (selectedParticipants.length === 0) {
-    //   alert('Pilih minimal 1 peserta yang wajib hadir')
-    //   setIsLoading(false)
-    //   return
-    // }
+    // Get current user from localStorage
+    let currentUserId = null
+    try {
+      const userData = localStorage.getItem('admin_user') || localStorage.getItem('user')
+      if (userData) {
+        const user = JSON.parse(userData)
+        currentUserId = user.id
+      }
+    } catch (error) {
+      console.error('Error getting user from localStorage:', error)
+    }
+
+    // Setup admin if no user ID found
+    if (!currentUserId) {
+      try {
+        const setupResponse = await fetch('/api/admin/setup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        })
+        const setupData = await setupResponse.json()
+        if (setupData.admin_id) {
+          currentUserId = setupData.admin_id
+        }
+      } catch (setupError) {
+        console.error('Error setting up admin:', setupError)
+      }
+    }
 
     try {
       const response = await fetch('/api/sesi', {
@@ -141,7 +162,8 @@ export default function CreateSession() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          peserta_ids: selectedParticipants
+          peserta_ids: selectedParticipants,
+          created_by_id: currentUserId
         })
       })
 
@@ -150,7 +172,7 @@ export default function CreateSession() {
         router.push('/admin/sesi')
       } else {
         const data = await response.json()
-        alert(data.error || 'Gagal membuat sesi')
+        alert('Gagal membuat sesi: ' + (data.error || 'Unknown error'))
       }
     } catch (error) {
       alert('Terjadi kesalahan sistem')
