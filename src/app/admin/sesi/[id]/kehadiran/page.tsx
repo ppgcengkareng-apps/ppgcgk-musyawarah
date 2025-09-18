@@ -75,12 +75,33 @@ export default function KehadiranPage() {
   const [absensi, setAbsensi] = useState<Absensi[]>([])
   const [allPeserta, setAllPeserta] = useState<Peserta[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [stats, setStats] = useState({
+    total: 0,
+    hadir: 0,
+    ghoib: 0,
+    izin: 0,
+    sakit: 0,
+    terlambat: 0
+  })
 
   useEffect(() => {
     if (sesiId) {
       fetchData()
     }
   }, [sesiId])
+
+  // Update stats when data changes
+  useEffect(() => {
+    const newStats = {
+      total: allPeserta.length,
+      hadir: absensi.filter(a => a.status_kehadiran === 'hadir').length,
+      ghoib: allPeserta.length - absensi.length,
+      izin: absensi.filter(a => a.status_kehadiran === 'izin').length,
+      sakit: absensi.filter(a => a.status_kehadiran === 'sakit').length,
+      terlambat: absensi.filter(a => a.status_kehadiran === 'terlambat').length
+    }
+    setStats(newStats)
+  }, [allPeserta, absensi])
 
   const fetchData = async () => {
     try {
@@ -153,21 +174,7 @@ export default function KehadiranPage() {
     return kehadiran?.catatan || '-'
   }
 
-  const stats = {
-    total: allPeserta.length,
-    hadir: absensi.filter(a => a.status_kehadiran === 'hadir').length,
-    ghoib: allPeserta.length - absensi.length,
-    izin: absensi.filter(a => a.status_kehadiran === 'izin').length,
-    sakit: absensi.filter(a => a.status_kehadiran === 'sakit').length,
-    terlambat: absensi.filter(a => a.status_kehadiran === 'terlambat').length
-  }
 
-  console.log('Stats calculation:', {
-    totalPeserta: allPeserta.length,
-    totalAbsensi: absensi.length,
-    absensiData: absensi,
-    stats
-  })
 
   if (isLoading) {
     return (
