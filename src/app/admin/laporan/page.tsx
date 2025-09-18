@@ -48,27 +48,75 @@ export default function LaporanManagement() {
 
   const handleExportExcel = async (type: string) => {
     try {
-      const response = await fetch(`/api/laporan?type=${type}`)
-      if (response.ok) {
-        const data = await response.json()
-        exportToExcel(data, `laporan-${type}-${new Date().toISOString().split('T')[0]}`, `Laporan ${type}`)
+      // Show loading state
+      const button = document.activeElement as HTMLButtonElement
+      if (button) {
+        button.disabled = true
+        button.textContent = 'Memproses...'
       }
+
+      const response = await fetch(`/api/laporan?type=${type}`)
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      
+      if (!data || (Array.isArray(data) && data.length === 0)) {
+        alert('Tidak ada data untuk diekspor')
+        return
+      }
+      
+      exportToExcel(data, `laporan-${type}-${new Date().toISOString().split('T')[0]}`, `Laporan ${type.charAt(0).toUpperCase() + type.slice(1)}`)
+      
     } catch (error) {
       console.error('Export Excel error:', error)
-      alert('Gagal export ke Excel')
+      alert(`Gagal export ke Excel: ${error instanceof Error ? error.message : 'Terjadi kesalahan'}`)
+    } finally {
+      // Reset button state
+      const button = document.activeElement as HTMLButtonElement
+      if (button) {
+        button.disabled = false
+        button.innerHTML = '<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>Excel'
+      }
     }
   }
 
   const handleExportPDF = async (type: string) => {
     try {
-      const response = await fetch(`/api/laporan?type=${type}`)
-      if (response.ok) {
-        const data = await response.json()
-        await exportToPDF(data, `laporan-${type}-${new Date().toISOString().split('T')[0]}`, `Laporan ${type.toUpperCase()}`)
+      // Show loading state
+      const button = document.activeElement as HTMLButtonElement
+      if (button) {
+        button.disabled = true
+        button.textContent = 'Memproses...'
       }
+
+      const response = await fetch(`/api/laporan?type=${type}`)
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      
+      if (!data || (Array.isArray(data) && data.length === 0)) {
+        alert('Tidak ada data untuk diekspor')
+        return
+      }
+      
+      await exportToPDF(data, `laporan-${type}-${new Date().toISOString().split('T')[0]}`, `Laporan ${type.charAt(0).toUpperCase() + type.slice(1)}`)
+      
     } catch (error) {
       console.error('Export PDF error:', error)
-      alert('Gagal export ke PDF')
+      alert(`Gagal export ke PDF: ${error instanceof Error ? error.message : 'Terjadi kesalahan'}`)
+    } finally {
+      // Reset button state
+      const button = document.activeElement as HTMLButtonElement
+      if (button) {
+        button.disabled = false
+        button.innerHTML = '<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>PDF'
+      }
     }
   }
 
@@ -76,7 +124,7 @@ export default function LaporanManagement() {
     return (
       <div className="p-6">
         <div className="text-center">
-          <div className="loading-spinner mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Memuat data laporan...</p>
         </div>
       </div>
