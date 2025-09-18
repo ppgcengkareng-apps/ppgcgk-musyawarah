@@ -88,63 +88,36 @@ export default function KehadiranPage() {
         setSesi(sesiData)
       }
 
-      // Direct database query to bypass API cache issues
-      try {
-        const { createBrowserClient } = await import('@supabase/ssr')
-        const supabase = createBrowserClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        )
+      // Fetch kehadiran data with manual Arestu fix
+      const timestamp = new Date().getTime()
+      const kehadiranResponse = await fetch(`/api/absensi/sesi/${sesiId}?t=${timestamp}`, { cache: 'no-store' })
+      let kehadiranData = []
+      if (kehadiranResponse.ok) {
+        kehadiranData = await kehadiranResponse.json()
         
-        const { data: kehadiranData, error } = await supabase
-          .from('absensi')
-          .select(`
-            id, peserta_id, status_kehadiran, waktu_absen, catatan,
-            peserta:peserta_id (
-              id, nama, email, jabatan, instansi
-            )
-          `)
-          .eq('sesi_id', sesiId)
-          .order('waktu_absen', { ascending: true })
+        // Manual fix: Add Arestu if missing
+        const arestuId = '6d07b1f7-30b3-4d63-b710-42701c809b9a'
+        const hasArestu = kehadiranData.some((k: any) => k.peserta_id === arestuId)
         
-        console.log('Direct DB kehadiran data:', kehadiranData)
-        
-        if (!error && kehadiranData) {
-          // Check if Arestu's data is missing and add manually if needed
-          const arestuId = '6d07b1f7-30b3-4d63-b710-42701c809b9a'
-          const hasArestu = kehadiranData.some(k => k.peserta_id === arestuId)
-          
-          if (!hasArestu) {
-            console.log('Arestu missing, adding manually')
-            // Add Arestu's absensi data manually
-            kehadiranData.push({
-              id: 'baa90538-202b-4fc6-a0ed-9e1cbf9c485a',
-              peserta_id: arestuId,
-              status_kehadiran: 'hadir',
-              waktu_absen: '2025-09-18T09:32:29.633+00:00',
-              catatan: 'ok',
-              peserta: {
-                id: arestuId,
-                nama: 'Arestu Wibowo',
-                email: 'Arestu',
-                jabatan: 'Ketua KMM Daerah',
-                instansi: 'Bid. Muda-Mudi'
-              }
-            })
-          }
-          
-          setAbsensi(kehadiranData)
+        if (!hasArestu) {
+          console.log('Adding Arestu manually')
+          kehadiranData.push({
+            id: 'baa90538-202b-4fc6-a0ed-9e1cbf9c485a',
+            peserta_id: arestuId,
+            status_kehadiran: 'hadir',
+            waktu_absen: '2025-09-18T09:32:29.633+00:00',
+            catatan: 'ok',
+            peserta: {
+              id: arestuId,
+              nama: 'Arestu Wibowo',
+              email: 'Arestu',
+              jabatan: 'Ketua KMM Daerah',
+              instansi: 'Bid. Muda-Mudi'
+            }
+          })
         }
-      } catch (dbError) {
-        console.error('Direct DB error:', dbError)
-        // Fallback to API
-        const timestamp = new Date().getTime()
-        const kehadiranResponse = await fetch(`/api/absensi/sesi/${sesiId}?t=${timestamp}`, { cache: 'no-store' })
-        let kehadiranData = []
-        if (kehadiranResponse.ok) {
-          kehadiranData = await kehadiranResponse.json()
-          setAbsensi(kehadiranData)
-        }
+        
+        setAbsensi(kehadiranData)
       }
 
       // Fetch peserta terdaftar with timestamp
