@@ -71,8 +71,8 @@ async function getAttendanceReport(supabase: any) {
   // Get related data
   const reportData = []
   if (absensiData && absensiData.length > 0) {
-    const pesertaIds = [...new Set(absensiData.map((a: any) => a.peserta_id))]
-    const sesiIds = [...new Set(absensiData.map((a: any) => a.sesi_id))]
+    const pesertaIds = Array.from(new Set(absensiData.map((a: any) => a.peserta_id)))
+    const sesiIds = Array.from(new Set(absensiData.map((a: any) => a.sesi_id)))
     
     const [pesertaResult, sesiResult] = await Promise.all([
       (supabase as any).from('peserta').select('id, nama, email').in('id', pesertaIds),
@@ -156,8 +156,8 @@ async function getNotesReport(supabase: any) {
   // Get related data
   const reportData = []
   if (notulensiData && notulensiData.length > 0) {
-    const sesiIds = [...new Set(notulensiData.map((n: any) => n.sesi_id))]
-    const pembuatIds = [...new Set(notulensiData.map((n: any) => n.dibuat_oleh))]
+    const sesiIds = Array.from(new Set(notulensiData.map((n: any) => n.sesi_id)))
+    const pembuatIds = Array.from(new Set(notulensiData.map((n: any) => n.dibuat_oleh)))
     
     const [sesiResult, pembuatResult] = await Promise.all([
       (supabase as any).from('sesi_musyawarah').select('id, nama_sesi, tanggal').in('id', sesiIds),
