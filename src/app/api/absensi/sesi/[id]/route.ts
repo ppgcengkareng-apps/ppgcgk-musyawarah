@@ -42,9 +42,9 @@ export async function GET(
     }
 
     // Get peserta data for each attendance record
-    const absensiWithPeserta = []
+    const absensiWithPeserta: any[] = []
     if (absensiData && absensiData.length > 0) {
-      const pesertaIds = absensiData.map((a: any) => a.peserta_id)
+      const pesertaIds = absensiData.map((a: any) => (a as any).peserta_id)
       console.log('Fetching peserta for IDs:', pesertaIds)
       
       const { data: pesertaData, error: pesertaError } = await supabase
@@ -58,9 +58,9 @@ export async function GET(
       
       // Combine absensi with peserta data
       for (const absen of absensiData) {
-        const peserta = pesertaData?.find((p: any) => p.id === absen.peserta_id)
+        const peserta = pesertaData?.find((p: any) => p.id === (absen as any).peserta_id)
         absensiWithPeserta.push({
-          ...absen,
+          ...(absen as any),
           peserta: peserta || null
         })
       }
