@@ -9,12 +9,16 @@ export async function GET(
     const sesiId = params.id
     const supabase = createServerClient()
 
+    console.log('Fetching absensi for sesi:', sesiId)
+    
     // Get attendance data
     const { data: absensiData, error: absensiError } = await (supabase as any)
       .from('absensi')
       .select('id, peserta_id, status_kehadiran, waktu_absen, catatan')
       .eq('sesi_id', sesiId)
       .order('waktu_absen', { ascending: true })
+    
+    console.log('Raw absensi data:', absensiData)
 
     if (absensiError) {
       console.error('Error fetching attendance:', absensiError)
