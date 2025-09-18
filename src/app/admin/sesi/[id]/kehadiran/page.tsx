@@ -119,7 +119,7 @@ export default function KehadiranPage() {
         kehadiranData = await kehadiranResponse.json()
         console.log('Kehadiran data:', kehadiranData)
         console.log('Kehadiran data length:', kehadiranData.length)
-        kehadiranData.forEach((item, index) => {
+        kehadiranData.forEach((item: any, index: number) => {
           console.log(`Absensi ${index}:`, {
             id: item.id,
             peserta_id: item.peserta_id,
