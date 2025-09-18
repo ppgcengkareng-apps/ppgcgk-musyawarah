@@ -18,8 +18,6 @@ export async function GET(request: NextRequest) {
         return await getSessionReport(supabase)
       case 'notulensi':
         return await getNotesReport(supabase)
-      case 'aktivitas':
-        return await getActivityReport(supabase)
       default:
         return await getOverviewStats(supabase)
     }
@@ -60,148 +58,74 @@ async function getOverviewStats(supabase: any) {
 }
 
 async function getAttendanceReport(supabase: any) {
-  // Get attendance data
-  const { data: absensiData, error: absensiError } = await (supabase as any)
+  const { data, error } = await (supabase as any)
     .from('absensi')
-    .select('id, peserta_id, sesi_id, status_kehadiran, waktu_absen, catatan')
+    .select(`
+      id,
+      status_kehadiran,
+      waktu_absen,
+      peserta:peserta_id(nama, username),
+      sesi:sesi_id(nama_sesi, tanggal)
+    `)
     .order('waktu_absen', { ascending: false })
 
-  if (absensiError) throw absensiError
-
-  // Get related data
-  const reportData = []
-  if (absensiData && absensiData.length > 0) {
-    const pesertaIds = Array.from(new Set(absensiData.map((a: any) => a.peserta_id)))
-    const sesiIds = Array.from(new Set(absensiData.map((a: any) => a.sesi_id)))
-    
-    const [pesertaResult, sesiResult] = await Promise.all([
-      (supabase as any).from('peserta').select('id, nama, email').in('id', pesertaIds),
-      (supabase as any).from('sesi_musyawarah').select('id, nama_sesi, tanggal').in('id', sesiIds)
-    ])
-    
-    // Combine data
-    for (const absen of absensiData) {
-      const peserta = pesertaResult.data?.find((p: any) => p.id === absen.peserta_id)
-      const sesi = sesiResult.data?.find((s: any) => s.id === absen.sesi_id)
-      
-      reportData.push({
-        'Nama Peserta': peserta?.nama || '-',
-        'Email': peserta?.email || '-',
-        'Nama Sesi': sesi?.nama_sesi || '-',
-        'Tanggal': sesi?.tanggal ? new Date(sesi.tanggal).toLocaleDateString('id-ID') : '-',
-        'Status Kehadiran': absen.status_kehadiran || '-',
-        'Waktu Absen': absen.waktu_absen ? new Date(absen.waktu_absen).toLocaleString('id-ID') : '-',
-        'Catatan': absen.catatan || '-'
-      })
-    }
-  }
-
-  return NextResponse.json(reportData)
+  if (error) throw error
+  return NextResponse.json(data || [])
 }
 
 async function getParticipantReport(supabase: any) {
   const { data, error } = await (supabase as any)
     .from('peserta')
-    .select('id, nama, email, nomor_hp, jabatan, instansi, role, aktif, created_at')
+    .select(`
+      id,
+      nama,
+      username,
+      role,
+      dapuan,
+      bidang,
+      created_at
+    `)
     .order('nama')
 
   if (error) throw error
-  
-  const reportData = data?.map((p: any) => ({
-    'Nama': p.nama || '-',
-    'Email': p.email || '-',
-    'Nomor HP': p.nomor_hp || '-',
-    'Jabatan': p.jabatan || '-',
-    'Instansi': p.instansi || '-',
-    'Role': p.role || '-',
-    'Status': p.aktif ? 'Aktif' : 'Tidak Aktif',
-    'Tanggal Daftar': p.created_at ? new Date(p.created_at).toLocaleDateString('id-ID') : '-'
-  })) || []
-  
-  return NextResponse.json(reportData)
+  return NextResponse.json(data || [])
 }
 
 async function getSessionReport(supabase: any) {
   const { data, error } = await (supabase as any)
     .from('sesi_musyawarah')
-    .select('id, nama_sesi, tanggal, waktu_mulai, waktu_selesai, lokasi, tipe, status, maksimal_peserta, created_at')
+    .select(`
+      id,
+      nama_sesi,
+      tanggal,
+      waktu_mulai,
+      waktu_selesai,
+      lokasi,
+      tipe,
+      status,
+      created_at
+    `)
     .order('tanggal', { ascending: false })
 
   if (error) throw error
-  
-  const reportData = data?.map((s: any) => ({
-    'Nama Sesi': s.nama_sesi || '-',
-    'Tanggal': s.tanggal ? new Date(s.tanggal).toLocaleDateString('id-ID') : '-',
-    'Waktu Mulai': s.waktu_mulai || '-',
-    'Waktu Selesai': s.waktu_selesai || '-',
-    'Lokasi': s.lokasi || '-',
-    'Tipe': s.tipe || '-',
-    'Status': s.status || '-',
-    'Maksimal Peserta': s.maksimal_peserta || '-',
-    'Tanggal Dibuat': s.created_at ? new Date(s.created_at).toLocaleDateString('id-ID') : '-'
-  })) || []
-  
-  return NextResponse.json(reportData)
+  return NextResponse.json(data || [])
 }
 
 async function getNotesReport(supabase: any) {
-  // Get notulensi data
-  const { data: notulensiData, error: notulensiError } = await (supabase as any)
+  const { data, error } = await (supabase as any)
     .from('notulensi_sesi')
-    .select('id, sesi_id, dibuat_oleh, judul, status, version, created_at, updated_at')
+    .select(`
+      id,
+      judul,
+      status,
+      version,
+      created_at,
+      updated_at,
+      sesi:sesi_id(nama_sesi, tanggal),
+      dibuat_oleh:dibuat_oleh(nama)
+    `)
     .order('created_at', { ascending: false })
 
-  if (notulensiError) throw notulensiError
-
-  // Get related data
-  const reportData = []
-  if (notulensiData && notulensiData.length > 0) {
-    const sesiIds = Array.from(new Set(notulensiData.map((n: any) => n.sesi_id)))
-    const pembuatIds = Array.from(new Set(notulensiData.map((n: any) => n.dibuat_oleh)))
-    
-    const [sesiResult, pembuatResult] = await Promise.all([
-      (supabase as any).from('sesi_musyawarah').select('id, nama_sesi, tanggal').in('id', sesiIds),
-      (supabase as any).from('peserta').select('id, nama').in('id', pembuatIds)
-    ])
-    
-    // Combine data
-    for (const notulensi of notulensiData) {
-      const sesi = sesiResult.data?.find((s: any) => s.id === notulensi.sesi_id)
-      const pembuat = pembuatResult.data?.find((p: any) => p.id === notulensi.dibuat_oleh)
-      
-      reportData.push({
-        'Judul': notulensi.judul || '-',
-        'Nama Sesi': sesi?.nama_sesi || '-',
-        'Tanggal Sesi': sesi?.tanggal ? new Date(sesi.tanggal).toLocaleDateString('id-ID') : '-',
-        'Dibuat Oleh': pembuat?.nama || '-',
-        'Status': notulensi.status || '-',
-        'Versi': notulensi.version || '-',
-        'Tanggal Dibuat': notulensi.created_at ? new Date(notulensi.created_at).toLocaleDateString('id-ID') : '-',
-        'Terakhir Update': notulensi.updated_at ? new Date(notulensi.updated_at).toLocaleDateString('id-ID') : '-'
-      })
-    }
-  }
-
-  return NextResponse.json(reportData)
-}
-
-async function getActivityReport(supabase: any) {
-  const { data, error } = await (supabase as any)
-    .from('peserta')
-    .select('id, nama, email, role, last_login, created_at')
-    .not('last_login', 'is', null)
-    .order('last_login', { ascending: false })
-    .limit(100)
-
   if (error) throw error
-  
-  const reportData = data?.map((p: any) => ({
-    'Nama': p.nama || '-',
-    'Email': p.email || '-',
-    'Role': p.role || '-',
-    'Login Terakhir': p.last_login ? new Date(p.last_login).toLocaleString('id-ID') : '-',
-    'Tanggal Daftar': p.created_at ? new Date(p.created_at).toLocaleDateString('id-ID') : '-'
-  })) || []
-  
-  return NextResponse.json(reportData)
+  return NextResponse.json(data || [])
 }

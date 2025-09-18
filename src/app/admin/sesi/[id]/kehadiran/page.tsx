@@ -37,33 +37,30 @@ interface Sesi {
 const getStatusIcon = (status: string) => {
   switch (status) {
     case 'hadir': return <CheckCircle className="w-4 h-4" />
-    case 'terlambat': return <Clock className="w-4 h-4" />
     case 'ghoib': return <XCircle className="w-4 h-4" />
     case 'izin': return <FileText className="w-4 h-4" />
     case 'sakit': return <Heart className="w-4 h-4" />
-    default: return <XCircle className="w-4 h-4" />
+    default: return <Clock className="w-4 h-4" />
   }
 }
 
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'hadir': return 'bg-green-100 text-green-800'
-    case 'terlambat': return 'bg-orange-100 text-orange-800'
     case 'ghoib': return 'bg-red-100 text-red-800'
     case 'izin': return 'bg-yellow-100 text-yellow-800'
     case 'sakit': return 'bg-blue-100 text-blue-800'
-    default: return 'bg-red-100 text-red-800'
+    default: return 'bg-gray-100 text-gray-800'
   }
 }
 
 const getStatusText = (status: string) => {
   switch (status) {
     case 'hadir': return 'Hadir'
-    case 'terlambat': return 'Terlambat'
     case 'ghoib': return 'Ghoib'
     case 'izin': return 'Izin'
     case 'sakit': return 'Sakit'
-    default: return 'Ghoib'
+    default: return 'Belum Absen'
   }
 }
 
@@ -75,33 +72,12 @@ export default function KehadiranPage() {
   const [absensi, setAbsensi] = useState<Absensi[]>([])
   const [allPeserta, setAllPeserta] = useState<Peserta[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [stats, setStats] = useState({
-    total: 0,
-    hadir: 0,
-    ghoib: 0,
-    izin: 0,
-    sakit: 0,
-    terlambat: 0
-  })
 
   useEffect(() => {
     if (sesiId) {
       fetchData()
     }
   }, [sesiId])
-
-  // Update stats when data changes
-  useEffect(() => {
-    const newStats = {
-      total: allPeserta.length,
-      hadir: absensi.filter(a => a.status_kehadiran === 'hadir').length,
-      ghoib: allPeserta.length - absensi.length,
-      izin: absensi.filter(a => a.status_kehadiran === 'izin').length,
-      sakit: absensi.filter(a => a.status_kehadiran === 'sakit').length,
-      terlambat: absensi.filter(a => a.status_kehadiran === 'terlambat').length
-    }
-    setStats(newStats)
-  }, [allPeserta, absensi])
 
   const fetchData = async () => {
     try {
@@ -117,21 +93,7 @@ export default function KehadiranPage() {
       let kehadiranData = []
       if (kehadiranResponse.ok) {
         kehadiranData = await kehadiranResponse.json()
-        console.log('Kehadiran data:', kehadiranData)
-        console.log('Kehadiran data length:', kehadiranData.length)
-        kehadiranData.forEach((item: any, index: number) => {
-          console.log(`Absensi ${index}:`, {
-            id: item.id,
-            peserta_id: item.peserta_id,
-            status: item.status_kehadiran,
-            waktu: item.waktu_absen,
-            catatan: item.catatan,
-            peserta: item.peserta
-          })
-        })
         setAbsensi(kehadiranData)
-      } else {
-        console.error('Failed to fetch kehadiran:', kehadiranResponse.status)
       }
 
       // Fetch peserta terdaftar
@@ -139,32 +101,19 @@ export default function KehadiranPage() {
       let pesertaTerdaftar = []
       if (pesertaResponse.ok) {
         pesertaTerdaftar = await pesertaResponse.json()
-        console.log('Peserta terdaftar:', pesertaTerdaftar)
       }
 
       // Gabungkan dengan peserta yang sudah absen tapi tidak terdaftar
       const pesertaAbsen = kehadiranData?.map((a: any) => a.peserta).filter(Boolean) || []
-      console.log('Peserta absen:', pesertaAbsen)
-      
       const allPesertaMap = new Map()
       
       // Tambahkan peserta terdaftar
-      pesertaTerdaftar.forEach((p: any) => {
-        if (p && p.id) {
-          allPesertaMap.set(p.id, p)
-        }
-      })
+      pesertaTerdaftar.forEach((p: any) => allPesertaMap.set(p.id, p))
       
       // Tambahkan peserta yang sudah absen
-      pesertaAbsen.forEach((p: any) => {
-        if (p && p.id) {
-          allPesertaMap.set(p.id, p)
-        }
-      })
+      pesertaAbsen.forEach((p: any) => allPesertaMap.set(p.id, p))
       
-      const finalPeserta = Array.from(allPesertaMap.values())
-      console.log('Final peserta list:', finalPeserta)
-      setAllPeserta(finalPeserta)
+      setAllPeserta(Array.from(allPesertaMap.values()))
     } catch (error) {
       console.error('Error fetching data:', error)
     } finally {
@@ -174,7 +123,6 @@ export default function KehadiranPage() {
 
   const getKehadiranStatus = (pesertaId: string) => {
     const kehadiran = absensi.find(a => a.peserta_id === pesertaId)
-    console.log(`Looking for peserta ${pesertaId}:`, kehadiran)
     return kehadiran ? kehadiran.status_kehadiran : 'ghoib'
   }
 
@@ -188,7 +136,13 @@ export default function KehadiranPage() {
     return kehadiran?.catatan || '-'
   }
 
-
+  const stats = {
+    total: allPeserta.length,
+    hadir: absensi.filter(a => a.status_kehadiran === 'hadir').length,
+    ghoib: allPeserta.length - absensi.length,
+    izin: absensi.filter(a => a.status_kehadiran === 'izin').length,
+    sakit: absensi.filter(a => a.status_kehadiran === 'sakit').length
+  }
 
   if (isLoading) {
     return (
@@ -220,7 +174,7 @@ export default function KehadiranPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
         <Card>
           <CardContent className="p-4 text-center">
             <Users className="w-8 h-8 text-blue-600 mx-auto mb-2" />
@@ -254,13 +208,6 @@ export default function KehadiranPage() {
             <Heart className="w-8 h-8 text-blue-600 mx-auto mb-2" />
             <div className="text-2xl font-bold text-blue-600">{stats.sakit}</div>
             <div className="text-sm text-gray-600">Sakit</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <Clock className="w-8 h-8 text-orange-600 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-orange-600">{stats.terlambat}</div>
-            <div className="text-sm text-gray-600">Terlambat</div>
           </CardContent>
         </Card>
       </div>
