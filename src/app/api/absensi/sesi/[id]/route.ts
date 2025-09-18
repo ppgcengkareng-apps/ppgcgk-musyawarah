@@ -44,7 +44,10 @@ export async function GET(
       }
     }
 
-    return NextResponse.json(absensiWithPeserta)
+    // Set cache headers to prevent caching
+    const response = NextResponse.json(absensiWithPeserta)
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate')
+    return response
 
   } catch (error) {
     console.error('API Error:', error)

@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, Users, CheckCircle, XCircle, Clock, FileText, Heart } from 'lucide-react'
+import { ArrowLeft, Users, CheckCircle, XCircle, Clock, FileText, Heart, RefreshCw } from 'lucide-react'
 import Link from 'next/link'
 
 interface Peserta {
@@ -82,14 +82,14 @@ export default function KehadiranPage() {
   const fetchData = async () => {
     try {
       // Fetch sesi info
-      const sesiResponse = await fetch(`/api/sesi/${sesiId}`)
+      const sesiResponse = await fetch(`/api/sesi/${sesiId}`, { cache: 'no-store' })
       if (sesiResponse.ok) {
         const sesiData = await sesiResponse.json()
         setSesi(sesiData)
       }
 
       // Fetch kehadiran data
-      const kehadiranResponse = await fetch(`/api/absensi/sesi/${sesiId}`)
+      const kehadiranResponse = await fetch(`/api/absensi/sesi/${sesiId}`, { cache: 'no-store' })
       let kehadiranData = []
       if (kehadiranResponse.ok) {
         kehadiranData = await kehadiranResponse.json()
@@ -97,23 +97,36 @@ export default function KehadiranPage() {
       }
 
       // Fetch peserta terdaftar
-      const pesertaResponse = await fetch(`/api/sesi/${sesiId}/peserta`)
+      const pesertaResponse = await fetch(`/api/sesi/${sesiId}/peserta`, { cache: 'no-store' })
       let pesertaTerdaftar = []
       if (pesertaResponse.ok) {
         pesertaTerdaftar = await pesertaResponse.json()
       }
 
+      console.log('Peserta terdaftar:', pesertaTerdaftar)
+      console.log('Kehadiran data:', kehadiranData)
+
       // Gabungkan dengan peserta yang sudah absen tapi tidak terdaftar
       const pesertaAbsen = kehadiranData?.map((a: any) => a.peserta).filter(Boolean) || []
       const allPesertaMap = new Map()
       
-      // Tambahkan peserta terdaftar
-      pesertaTerdaftar.forEach((p: any) => allPesertaMap.set(p.id, p))
+      // Tambahkan peserta terdaftar (prioritas utama)
+      pesertaTerdaftar.forEach((p: any) => {
+        if (p && p.id) {
+          allPesertaMap.set(p.id, p)
+        }
+      })
       
-      // Tambahkan peserta yang sudah absen
-      pesertaAbsen.forEach((p: any) => allPesertaMap.set(p.id, p))
+      // Tambahkan peserta yang sudah absen tapi belum terdaftar
+      pesertaAbsen.forEach((p: any) => {
+        if (p && p.id && !allPesertaMap.has(p.id)) {
+          allPesertaMap.set(p.id, p)
+        }
+      })
       
-      setAllPeserta(Array.from(allPesertaMap.values()))
+      const finalPesertaList = Array.from(allPesertaMap.values())
+      console.log('Final peserta list:', finalPesertaList)
+      setAllPeserta(finalPesertaList)
     } catch (error) {
       console.error('Error fetching data:', error)
     } finally {
@@ -158,19 +171,30 @@ export default function KehadiranPage() {
   return (
     <div className="p-6">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        <Link href="/admin/sesi">
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Kembali
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Kehadiran Peserta</h1>
-          <p className="text-gray-600 mt-1">
-            {sesi?.nama_sesi} - {sesi && new Date(sesi.tanggal).toLocaleDateString('id-ID')}
-          </p>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-4">
+          <Link href="/admin/sesi">
+            <Button variant="outline" size="sm">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Kembali
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Kehadiran Peserta</h1>
+            <p className="text-gray-600 mt-1">
+              {sesi?.nama_sesi} - {sesi && new Date(sesi.tanggal).toLocaleDateString('id-ID')}
+            </p>
+          </div>
         </div>
+        <Button 
+          onClick={fetchData} 
+          variant="outline" 
+          size="sm"
+          disabled={isLoading}
+        >
+          <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+          Refresh Data
+        </Button>
       </div>
 
       {/* Stats Cards */}
