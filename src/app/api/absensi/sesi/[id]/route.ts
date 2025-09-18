@@ -9,9 +9,10 @@ export async function GET(
     const sesiId = params.id
     const supabase = createServerClient()
 
-    console.log('=== ABSENSI API DEBUG ===')
+    console.log('=== ABSENSI API DEBUG V2 ===')
     console.log('Fetching absensi for sesi:', sesiId)
     console.log('Timestamp:', new Date().toISOString())
+    console.log('Force cache clear:', Math.random())
     
     // Test connection first
     const { data: testData, error: testError } = await supabase
@@ -27,6 +28,15 @@ export async function GET(
       .select('id, peserta_id, status_kehadiran, waktu_absen, catatan')
       .eq('sesi_id', sesiId)
       .order('waktu_absen', { ascending: true })
+    
+    // Force check for Arestu specifically
+    const { data: arestuCheck } = await supabase
+      .from('absensi')
+      .select('*')
+      .eq('peserta_id', '6d07b1f7-30b3-4d63-b710-42701c809b9a')
+      .eq('sesi_id', sesiId)
+    
+    console.log('Arestu specific check:', arestuCheck)
     
     console.log('Raw absensi query result:')
     console.log('- Count:', absensiData?.length || 0)
@@ -67,7 +77,7 @@ export async function GET(
     }
 
     console.log('Final result count:', absensiWithPeserta.length)
-    console.log('=== END ABSENSI API DEBUG ===')
+    console.log('=== END ABSENSI API DEBUG V2 ===')
 
     // Set cache headers to prevent caching
     const response = NextResponse.json(absensiWithPeserta)
