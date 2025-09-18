@@ -11,14 +11,19 @@ export async function GET(
 
     console.log('Fetching absensi for sesi:', sesiId)
     
-    // Get attendance data
+    // Get attendance data with explicit casting
     const { data: absensiData, error: absensiError } = await (supabase as any)
       .from('absensi')
       .select('id, peserta_id, status_kehadiran, waktu_absen, catatan')
       .eq('sesi_id', sesiId)
       .order('waktu_absen', { ascending: true })
     
+    console.log('Raw absensi data count:', absensiData?.length)
     console.log('Raw absensi data:', absensiData)
+    
+    if (absensiError) {
+      console.error('Absensi error:', absensiError)
+    }
 
     if (absensiError) {
       console.error('Error fetching attendance:', absensiError)
