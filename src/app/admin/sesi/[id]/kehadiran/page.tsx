@@ -118,7 +118,20 @@ export default function KehadiranPage() {
       if (kehadiranResponse.ok) {
         kehadiranData = await kehadiranResponse.json()
         console.log('Kehadiran data:', kehadiranData)
+        console.log('Kehadiran data length:', kehadiranData.length)
+        kehadiranData.forEach((item, index) => {
+          console.log(`Absensi ${index}:`, {
+            id: item.id,
+            peserta_id: item.peserta_id,
+            status: item.status_kehadiran,
+            waktu: item.waktu_absen,
+            catatan: item.catatan,
+            peserta: item.peserta
+          })
+        })
         setAbsensi(kehadiranData)
+      } else {
+        console.error('Failed to fetch kehadiran:', kehadiranResponse.status)
       }
 
       // Fetch peserta terdaftar
@@ -161,6 +174,7 @@ export default function KehadiranPage() {
 
   const getKehadiranStatus = (pesertaId: string) => {
     const kehadiran = absensi.find(a => a.peserta_id === pesertaId)
+    console.log(`Looking for peserta ${pesertaId}:`, kehadiran)
     return kehadiran ? kehadiran.status_kehadiran : 'ghoib'
   }
 
