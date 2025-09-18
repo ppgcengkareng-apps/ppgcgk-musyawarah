@@ -88,16 +88,17 @@ export default function KehadiranPage() {
         setSesi(sesiData)
       }
 
-      // Fetch kehadiran data
-      const kehadiranResponse = await fetch(`/api/absensi/sesi/${sesiId}`, { cache: 'no-store' })
+      // Fetch kehadiran data with timestamp to bypass cache
+      const timestamp = new Date().getTime()
+      const kehadiranResponse = await fetch(`/api/absensi/sesi/${sesiId}?t=${timestamp}`, { cache: 'no-store' })
       let kehadiranData = []
       if (kehadiranResponse.ok) {
         kehadiranData = await kehadiranResponse.json()
         setAbsensi(kehadiranData)
       }
 
-      // Fetch peserta terdaftar
-      const pesertaResponse = await fetch(`/api/sesi/${sesiId}/peserta`, { cache: 'no-store' })
+      // Fetch peserta terdaftar with timestamp
+      const pesertaResponse = await fetch(`/api/sesi/${sesiId}/peserta?t=${timestamp}`, { cache: 'no-store' })
       let pesertaTerdaftar = []
       if (pesertaResponse.ok) {
         pesertaTerdaftar = await pesertaResponse.json()
