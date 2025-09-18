@@ -60,11 +60,26 @@ export default function CreateNotulensiForm() {
     
     setIsLoading(true)
 
+    // Get current user from localStorage
+    let currentUserId = null
+    try {
+      const userData = localStorage.getItem('admin_user') || localStorage.getItem('user')
+      if (userData) {
+        const user = JSON.parse(userData)
+        currentUserId = user.id
+      }
+    } catch (error) {
+      console.error('Error getting user from localStorage:', error)
+    }
+
     try {
       const response = await fetch('/api/notulensi', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          dibuat_oleh_id: currentUserId
+        })
       })
 
       if (response.ok) {

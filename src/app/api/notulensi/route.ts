@@ -43,33 +43,81 @@ export async function POST(request: NextRequest) {
     const supabase = createServerClient()
     const body = await request.json()
     
+    const { 
+      sesi_id, 
+      judul, 
+      isi_notulensi, 
+      kesimpulan, 
+      tindak_lanjut,
+      dibuat_oleh_id
+    } = body
+    
     // Validate required fields
-    if (!body.sesi_id || !body.judul) {
+    if (!sesi_id || !judul) {
       return NextResponse.json(
         { error: 'Sesi ID dan judul wajib diisi' },
         { status: 400 }
       )
     }
     
-    // Get first admin user as creator
-    const { data: adminUser } = await supabase
-      .from('peserta')
-      .select('id')
-      .eq('role', 'admin')
-      .limit(1)
-      .single()
-
-    const createdBy = (adminUser as any)?.id || '00000000-0000-0000-0000-000000000000'
+    // Get created_by from request body or find first admin
+    let createdBy = dibuat_oleh_id
+    
+    if (!createdBy) {
+      // Find first admin user as fallback
+      const { data: adminUser, error: adminError } = await (supabase as any)
+        .from('peserta')
+        .select('id')
+        .in('role', ['admin', 'super_admin', 'admin_kmm'])
+        .eq('aktif', true)
+        .limit(1)
+        .single()
+      
+      if (adminUser) {
+        createdBy = adminUser.id
+      } else {
+        // Create default admin if none exists
+        const { data: newAdmin, error: createError } = await (supabase as any)
+          .from('peserta')
+          .insert({
+            nama: 'Admin PPG',
+            email: 'admin@ppg.id',
+            role: 'admin',
+            password_hash: 'admin123',
+            aktif: true,
+            created_at: new Date().toISOString()
+          })
+          .select('id')
+          .single()
+        
+        if (newAdmin) {
+          createdBy = newAdmin.id
+        } else {
+          return NextResponse.json(
+            { error: 'Gagal membuat admin default: ' + (createError?.message || 'Unknown error') },
+            { status: 500 }
+          )
+        }
+      }
+    }
+    
+    // Final validation
+    if (!createdBy) {
+      return NextResponse.json(
+        { error: 'Tidak dapat menentukan pembuat notulensi' },
+        { status: 400 }
+      )
+    }
 
     const { data, error } = await (supabase as any)
       .from('notulensi_sesi')
       .insert({
-        sesi_id: body.sesi_id,
-        judul: body.judul,
-        agenda: body.isi_notulensi || '',
-        pembahasan: body.isi_notulensi || '',
-        keputusan: body.kesimpulan || '',
-        tindak_lanjut: body.tindak_lanjut || '',
+        sesi_id: sesi_id,
+        judul: judul,
+        agenda: isi_notulensi || '',
+        pembahasan: isi_notulensi || '',
+        keputusan: kesimpulan || '',
+        tindak_lanjut: tindak_lanjut || '',
         status: 'draft',
         version: 1,
         dibuat_oleh: createdBy
