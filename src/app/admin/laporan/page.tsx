@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import { exportToExcel, exportToPDF } from '@/lib/export'
 import RoleGuard from '@/components/admin/role-guard'
+import CustomReportModal from '@/components/admin/custom-report-modal'
 
 export default function LaporanManagement() {
   const [stats, setStats] = useState({
@@ -27,6 +28,7 @@ export default function LaporanManagement() {
     approvalRate: 0
   })
   const [isLoading, setIsLoading] = useState(true)
+  const [showCustomModal, setShowCustomModal] = useState(false)
 
   useEffect(() => {
     fetchReportData()
@@ -69,6 +71,34 @@ export default function LaporanManagement() {
     } catch (error) {
       console.error('Export PDF error:', error)
       alert('Gagal export ke PDF')
+    }
+  }
+
+  const handleCustomReport = async (params: any) => {
+    try {
+      const response = await fetch('/api/laporan/custom', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params)
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        const filename = `laporan-kustom-${params.jenis_laporan}-${new Date().toISOString().split('T')[0]}`
+        const title = `Laporan Kustom ${params.jenis_laporan.toUpperCase()}`
+        
+        if (params.format_output === 'excel') {
+          exportToExcel(data, filename, 'Laporan Kustom')
+        } else {
+          await exportToPDF(data, filename, title)
+        }
+      } else {
+        const errorData = await response.json()
+        alert(errorData.error || 'Gagal membuat laporan kustom')
+      }
+    } catch (error) {
+      console.error('Custom report error:', error)
+      alert('Terjadi kesalahan saat membuat laporan')
     }
   }
 
@@ -432,7 +462,11 @@ export default function LaporanManagement() {
               <p className="text-sm text-gray-600">
                 Pilih parameter dan rentang waktu untuk membuat laporan kustom
               </p>
-              <Button className="w-full" variant="outline">
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={() => setShowCustomModal(true)}
+              >
                 <PieChart className="w-4 h-4 mr-2" />
                 Buat Laporan Kustom
               </Button>
@@ -440,6 +474,13 @@ export default function LaporanManagement() {
           </CardContent>
         </Card>
       </div>
+      
+      {/* Custom Report Modal */}
+      <CustomReportModal 
+        isOpen={showCustomModal}
+        onClose={() => setShowCustomModal(false)}
+        onGenerate={handleCustomReport}
+      />
       </div>
     </RoleGuard>
   )
