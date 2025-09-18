@@ -9,35 +9,42 @@ export async function GET(
     const sesiId = params.id
     const supabase = createServerClient()
 
-    // Get attendance data with peserta info
-    const { data: absensi, error } = await supabase
+    // Get attendance data
+    const { data: absensiData, error: absensiError } = await (supabase as any)
       .from('absensi')
-      .select(`
-        id,
-        peserta_id,
-        status_kehadiran,
-        waktu_absen,
-        catatan,
-        peserta:peserta_id (
-          id,
-          nama,
-          email,
-          jabatan,
-          instansi
-        )
-      `)
+      .select('id, peserta_id, status_kehadiran, waktu_absen, catatan')
       .eq('sesi_id', sesiId)
       .order('waktu_absen', { ascending: true })
 
-    if (error) {
-      console.error('Error fetching attendance:', error)
+    if (absensiError) {
+      console.error('Error fetching attendance:', absensiError)
       return NextResponse.json(
         { error: 'Gagal mengambil data kehadiran' },
         { status: 500 }
       )
     }
 
-    return NextResponse.json(absensi || [])
+    // Get peserta data for each attendance record
+    const absensiWithPeserta = []
+    if (absensiData && absensiData.length > 0) {
+      const pesertaIds = absensiData.map((a: any) => a.peserta_id)
+      
+      const { data: pesertaData } = await (supabase as any)
+        .from('peserta')
+        .select('id, nama, email, jabatan, instansi')
+        .in('id', pesertaIds)
+      
+      // Combine absensi with peserta data
+      for (const absen of absensiData) {
+        const peserta = pesertaData?.find((p: any) => p.id === absen.peserta_id)
+        absensiWithPeserta.push({
+          ...absen,
+          peserta: peserta || null
+        })
+      }
+    }
+
+    return NextResponse.json(absensiWithPeserta)
 
   } catch (error) {
     console.error('API Error:', error)

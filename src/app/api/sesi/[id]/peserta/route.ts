@@ -9,30 +9,34 @@ export async function GET(
     const sesiId = params.id
     const supabase = createServerClient()
 
-    // Get peserta assigned to this sesi
-    const { data, error } = await (supabase as any)
+    // Get peserta IDs assigned to this sesi
+    const { data: sesiPesertaData, error: sesiError } = await (supabase as any)
       .from('sesi_peserta')
-      .select(`
-        peserta:peserta_id (
-          id,
-          nama,
-          email,
-          jabatan,
-          instansi
-        )
-      `)
+      .select('peserta_id')
       .eq('sesi_id', sesiId)
 
-    if (error) {
-      console.error('Error fetching peserta:', error)
+    if (sesiError) {
+      console.error('Error fetching sesi_peserta:', sesiError)
       return NextResponse.json(
         { error: 'Gagal mengambil data peserta' },
         { status: 500 }
       )
     }
 
-    // Extract peserta data from the nested structure
-    const pesertaList = data?.map((item: any) => item.peserta).filter(Boolean) || []
+    // Get peserta details
+    let pesertaList = []
+    if (sesiPesertaData && sesiPesertaData.length > 0) {
+      const pesertaIds = sesiPesertaData.map((sp: any) => sp.peserta_id)
+      
+      const { data: pesertaData, error: pesertaError } = await (supabase as any)
+        .from('peserta')
+        .select('id, nama, email, jabatan, instansi')
+        .in('id', pesertaIds)
+      
+      if (!pesertaError) {
+        pesertaList = pesertaData || []
+      }
+    }
 
     return NextResponse.json(pesertaList)
 
