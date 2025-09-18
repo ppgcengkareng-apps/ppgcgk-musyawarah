@@ -1,4 +1,13 @@
 import * as XLSX from 'xlsx'
+import jsPDF from 'jspdf'
+import 'jspdf-autotable'
+
+// Extend jsPDF interface
+declare module 'jspdf' {
+  interface jsPDF {
+    autoTable: (options: any) => void
+  }
+}
 
 export const exportToExcel = (data: any[], filename: string, sheetName: string = 'Sheet1') => {
   const ws = XLSX.utils.json_to_sheet(data)
@@ -23,94 +32,69 @@ export const exportToPDF = async (data: any[], filename: string, title: string) 
           // Handle nested objects (seperti peserta, sesi)
           if (item[key].nama) flattened[`${key}_nama`] = item[key].nama
           else if (item[key].nama_sesi) flattened[`${key}_nama`] = item[key].nama_sesi
-          else if (item[key].username) flattened[`${key}_username`] = item[key].username
+          else if (item[key].email) flattened[`${key}_email`] = item[key].email
           else flattened[key] = JSON.stringify(item[key])
         } else {
-          flattened[key] = item[key]
+          flattened[key] = formatCellValue(item[key])
         }
       })
       return flattened
     })
 
-    // Buat HTML untuk PDF
+    // Buat PDF menggunakan jsPDF
+    const doc = new jsPDF('landscape', 'mm', 'a4')
+    
+    // Header
+    doc.setFontSize(16)
+    doc.setFont('helvetica', 'bold')
+    doc.text(title, doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' })
+    
+    // Info
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'normal')
+    const dateStr = new Date().toLocaleDateString('id-ID', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    })
+    doc.text(`Tanggal Cetak: ${dateStr}`, 20, 30)
+    doc.text(`Total Data: ${flattenedData.length} record`, 20, 35)
+    
+    // Prepare table data
     const headers = Object.keys(flattenedData[0] || {})
-    const html = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>${title}</title>
-        <meta charset="UTF-8">
-        <style>
-          body { font-family: Arial, sans-serif; margin: 20px; font-size: 12px; }
-          h1 { color: #333; text-align: center; margin-bottom: 10px; }
-          .info { text-align: center; margin-bottom: 20px; color: #666; }
-          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-          th, td { border: 1px solid #ddd; padding: 6px; text-align: left; word-wrap: break-word; }
-          th { background-color: #f2f2f2; font-weight: bold; font-size: 11px; }
-          tr:nth-child(even) { background-color: #f9f9f9; }
-          .no-data { text-align: center; padding: 20px; color: #666; }
-          @media print { 
-            body { margin: 0; } 
-            @page { size: A4 landscape; margin: 1cm; }
-          }
-        </style>
-      </head>
-      <body>
-        <h1>${title}</h1>
-        <div class="info">
-          <p>Tanggal Cetak: ${new Date().toLocaleDateString('id-ID', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          })}</p>
-          <p>Total Data: ${flattenedData.length} record</p>
-        </div>
-        ${headers.length > 0 ? `
-        <table>
-          <thead>
-            <tr>
-              ${headers.map(key => `<th>${key.replace(/_/g, ' ').toUpperCase()}</th>`).join('')}
-            </tr>
-          </thead>
-          <tbody>
-            ${flattenedData.map(row => `
-              <tr>
-                ${headers.map(key => `<td>${formatCellValue(row[key])}</td>`).join('')}
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-        ` : '<div class="no-data">Tidak ada data untuk ditampilkan</div>'}
-      </body>
-      </html>
-    `
-
-    // Coba buka window baru
-    const printWindow = window.open('', '_blank', 'width=800,height=600')
+    const tableHeaders = headers.map(key => key.replace(/_/g, ' ').toUpperCase())
+    const tableData = flattenedData.map(row => 
+      headers.map(key => String(row[key] || '-'))
+    )
     
-    if (!printWindow) {
-      // Fallback jika popup diblokir
-      alert('Popup diblokir oleh browser. Silakan izinkan popup untuk mengunduh PDF.')
-      return
-    }
-
-    printWindow.document.write(html)
-    printWindow.document.close()
+    // Generate table
+    doc.autoTable({
+      head: [tableHeaders],
+      body: tableData,
+      startY: 45,
+      styles: {
+        fontSize: 8,
+        cellPadding: 2,
+      },
+      headStyles: {
+        fillColor: [66, 139, 202],
+        textColor: 255,
+        fontStyle: 'bold'
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245]
+      },
+      margin: { top: 45, left: 10, right: 10 },
+      tableWidth: 'auto',
+      columnStyles: {
+        // Auto-adjust column widths
+      }
+    })
     
-    // Tunggu sampai konten dimuat
-    printWindow.onload = () => {
-      setTimeout(() => {
-        printWindow.focus()
-        printWindow.print()
-        
-        // Tutup window setelah print dialog ditutup
-        setTimeout(() => {
-          printWindow.close()
-        }, 1000)
-      }, 500)
-    }
-
+    // Download PDF
+    doc.save(`${filename}.pdf`)
+    
   } catch (error) {
     console.error('Error exporting PDF:', error)
     alert('Gagal mengekspor PDF. Silakan coba lagi.')
