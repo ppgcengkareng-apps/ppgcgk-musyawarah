@@ -9,6 +9,10 @@ export async function GET(
     const sesiId = params.id
     const supabase = createServerClient()
 
+    console.log('=== KEHADIRAN API DEBUG ===')
+    console.log('Sesi ID:', sesiId)
+    console.log('Timestamp:', new Date().toISOString())
+
     // Get all assigned peserta
     const { data: allPesertaData, error: pesertaError } = await supabase
       .from('sesi_peserta')
@@ -23,6 +27,9 @@ export async function GET(
       `)
       .eq('sesi_id', sesiId)
 
+    console.log('Sesi Peserta Raw Data:', allPesertaData)
+    console.log('Sesi Peserta Error:', pesertaError)
+
     if (pesertaError) {
       console.error('Error fetching peserta:', pesertaError)
       return NextResponse.json({ error: 'Gagal mengambil data peserta' }, { status: 500 })
@@ -34,24 +41,44 @@ export async function GET(
       .select('peserta_id, status_kehadiran, waktu_absen, catatan')
       .eq('sesi_id', sesiId)
 
+    console.log('Absensi Data:', absensiData)
+    console.log('Absensi Error:', absensiError)
+
     if (absensiError) {
       console.error('Error fetching absensi:', absensiError)
     }
 
+    // Get peserta who have attended but might not be in sesi_peserta
+    const attendedPesertaIds = absensiData?.map((a: any) => a.peserta_id) || []
+    const assignedPesertaIds = allPesertaData?.map((item: any) => item.peserta?.id).filter(Boolean) || []
+    const allPesertaIds = [...new Set([...assignedPesertaIds, ...attendedPesertaIds])]
+
+    console.log('Assigned Peserta IDs:', assignedPesertaIds)
+    console.log('Attended Peserta IDs:', attendedPesertaIds)
+    console.log('All Peserta IDs:', allPesertaIds)
+
+    // Get all peserta details
+    const { data: allPesertaDetails, error: pesertaDetailsError } = await supabase
+      .from('peserta')
+      .select('id, nama, email, jabatan, instansi')
+      .in('id', allPesertaIds)
+
+    console.log('All Peserta Details:', allPesertaDetails)
+
     // Combine data: all peserta with their attendance status
-    const result = allPesertaData
-      .map((item: any) => item.peserta)
-      .filter((peserta: any) => peserta && peserta.id)
-      .map((peserta: any) => {
-        const absensi = absensiData?.find((a: any) => a.peserta_id === peserta.id) as any
-        return {
-          peserta,
-          absensi: absensi || null,
-          status_kehadiran: absensi?.status_kehadiran || 'ghoib',
-          waktu_absen: absensi?.waktu_absen || null,
-          catatan: absensi?.catatan || null
-        }
-      })
+    const result = allPesertaDetails?.map((peserta: any) => {
+      const absensi = absensiData?.find((a: any) => a.peserta_id === peserta.id) as any
+      return {
+        peserta,
+        absensi: absensi || null,
+        status_kehadiran: absensi?.status_kehadiran || 'ghoib',
+        waktu_absen: absensi?.waktu_absen || null,
+        catatan: absensi?.catatan || null
+      }
+    }) || []
+
+    console.log('Final Result:', result)
+    console.log('=== END KEHADIRAN API DEBUG ===')
 
     const response = NextResponse.json(result)
     response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate')
