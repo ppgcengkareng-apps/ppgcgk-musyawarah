@@ -15,11 +15,14 @@ export async function POST(
       .select('peserta_id')
       .eq('sesi_id', sesiId)
 
+    console.log('Absensi data:', absensiData)
+
     if (!absensiData || absensiData.length === 0) {
       return NextResponse.json({ message: 'Tidak ada peserta yang perlu di-assign' })
     }
 
     const pesertaAbsenIds = absensiData.map((a: any) => a.peserta_id)
+    console.log('Peserta absen IDs:', pesertaAbsenIds)
 
     // Get peserta yang sudah terdaftar di sesi_peserta
     const { data: sesiPesertaData } = await (supabase as any)
@@ -27,12 +30,15 @@ export async function POST(
       .select('peserta_id')
       .eq('sesi_id', sesiId)
 
+    console.log('Sesi peserta data:', sesiPesertaData)
     const pesertaTerdaftarIds = sesiPesertaData?.map((sp: any) => sp.peserta_id) || []
+    console.log('Peserta terdaftar IDs:', pesertaTerdaftarIds)
 
     // Find peserta yang sudah absen tapi belum terdaftar
     const pesertaBelumTerdaftar = pesertaAbsenIds.filter(
       (id: string) => !pesertaTerdaftarIds.includes(id)
     )
+    console.log('Peserta belum terdaftar:', pesertaBelumTerdaftar)
 
     if (pesertaBelumTerdaftar.length === 0) {
       return NextResponse.json({ message: 'Semua peserta sudah terdaftar' })
