@@ -16,6 +16,9 @@ export async function GET(
       .eq('sesi_id', sesiId)
       .order('waktu_absen', { ascending: true })
 
+    console.log('Raw absensi data:', absensiData)
+    console.log('Absensi count:', absensiData?.length)
+
     if (absensiError) {
       console.error('Error fetching attendance:', absensiError)
       return NextResponse.json(
@@ -34,6 +37,9 @@ export async function GET(
         .select('id, nama, email, jabatan, instansi')
         .in('id', pesertaIds)
       
+      console.log('Peserta IDs to fetch:', pesertaIds)
+      console.log('Peserta data fetched:', pesertaData)
+      
       if (pesertaError) {
         console.error('Error fetching peserta data:', pesertaError)
       }
@@ -41,11 +47,14 @@ export async function GET(
       // Combine absensi with peserta data
       for (const absen of absensiData) {
         const peserta = pesertaData?.find((p: any) => p.id === absen.peserta_id)
+        console.log(`Matching peserta for ${absen.peserta_id}:`, peserta)
         absensiWithPeserta.push({
           ...absen,
           peserta: peserta || null
         })
       }
+      
+      console.log('Final absensi with peserta:', absensiWithPeserta)
     }
 
     return NextResponse.json(absensiWithPeserta)
