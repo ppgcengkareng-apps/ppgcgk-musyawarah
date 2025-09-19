@@ -45,7 +45,13 @@ export default function DesaDetailPage() {
       
       if (result.success) {
         const desa = result.data.find((d: any) => d.id === desaId)
-        setDesaData(desa)
+        if (desa) {
+          setDesaData(desa)
+        } else {
+          toast.error('Data desa tidak ditemukan')
+        }
+      } else {
+        toast.error('Gagal mengambil data desa')
       }
     } catch (error) {
       toast.error('Gagal mengambil data desa')
@@ -54,8 +60,12 @@ export default function DesaDetailPage() {
 
   const fetchKelompokStatus = async () => {
     try {
-      if (!desaData || !desaData.kelompok) return
+      if (!desaData || !desaData.kelompok) {
+        console.log('No desa data or kelompok:', desaData)
+        return
+      }
 
+      console.log('Fetching status for kelompok:', desaData.kelompok)
       const kelompokStatus: Kelompok[] = []
       
       for (const kelompok of desaData.kelompok) {
@@ -84,7 +94,9 @@ export default function DesaDetailPage() {
       }
       
       setKelompokList(kelompokStatus)
+      console.log('Final kelompok status:', kelompokStatus)
     } catch (error) {
+      console.error('Error fetching kelompok status:', error)
       toast.error('Gagal mengambil status kelompok')
     } finally {
       setLoading(false)
@@ -229,47 +241,65 @@ export default function DesaDetailPage() {
       </div>
 
       {/* Kelompok List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {kelompokList.map((kelompok) => (
-          <Card key={kelompok.nama} className="hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center justify-between text-lg">
-                <span className="flex items-center gap-2">
-                  {getStatusIcon(kelompok.status)}
-                  {kelompok.nama}
-                </span>
-                {getStatusBadge(kelompok.status)}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="text-sm text-gray-600">
-                  <div>Kategori Lengkap: {kelompok.completedCategories}/4</div>
-                  <div>Total Data: {kelompok.totalData}</div>
-                </div>
-                
-                <div className="flex gap-2">
-                  <Link href={`/admin/kbm-desa/${desaId}/${encodeURIComponent(kelompok.nama)}?periode=${periode}`} className="flex-1">
-                    <Button size="sm" className="w-full">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Input Data
-                    </Button>
-                  </Link>
+      {kelompokList.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {kelompokList.map((kelompok) => (
+            <Card key={kelompok.nama} className="hover:shadow-lg transition-shadow">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center justify-between text-lg">
+                  <span className="flex items-center gap-2">
+                    {getStatusIcon(kelompok.status)}
+                    {kelompok.nama}
+                  </span>
+                  {getStatusBadge(kelompok.status)}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="text-sm text-gray-600">
+                    <div>Kategori Lengkap: {kelompok.completedCategories}/4</div>
+                    <div>Total Data: {kelompok.totalData}</div>
+                  </div>
                   
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => handleCopyTemplate(kelompok.nama)}
-                    title="Copy dari periode sebelumnya"
-                  >
-                    <Copy className="w-4 h-4" />
-                  </Button>
+                  <div className="flex gap-2">
+                    <Link href={`/admin/kbm-desa/${desaId}/${encodeURIComponent(kelompok.nama)}?periode=${periode}`} className="flex-1">
+                      <Button size="sm" className="w-full">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Input Data
+                      </Button>
+                    </Link>
+                    
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => handleCopyTemplate(kelompok.nama)}
+                      title="Copy dari periode sebelumnya"
+                    >
+                      <Copy className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Card>
+          <CardContent className="text-center py-12">
+            <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Tidak Ada Data Kelompok</h3>
+            <p className="text-gray-600 mb-4">Data kelompok untuk desa ini belum tersedia atau sedang dimuat.</p>
+            {desaData && (
+              <div className="text-sm text-gray-500">
+                <p>Debug Info:</p>
+                <p>Desa ID: {desaId}</p>
+                <p>Periode: {periode}</p>
+                <p>Desa Data: {JSON.stringify(desaData)}</p>
               </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

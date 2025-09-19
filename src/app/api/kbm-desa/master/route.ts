@@ -52,11 +52,8 @@ export async function GET(request: NextRequest) {
 
     // Filter berdasarkan role KBM Desa
     if (userRole && userRole.startsWith('kbm_desa_')) {
-      const desaName = userRole.replace('kbm_desa_', '').replace('_', ' ')
-      filteredData = DESA_DATA.filter(desa => 
-        desa.id === userRole.replace('kbm_desa_', '') ||
-        desa.nama_desa.toLowerCase().replace(' ', '_') === desaName
-      )
+      const allowedDesaId = userRole.replace('kbm_desa_', '')
+      filteredData = DESA_DATA.filter(desa => desa.id === allowedDesaId)
     }
 
     return NextResponse.json({
