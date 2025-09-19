@@ -29,10 +29,14 @@ export async function GET(
     if (absensiData && absensiData.length > 0) {
       const pesertaIds = absensiData.map((a: any) => a.peserta_id)
       
-      const { data: pesertaData } = await (supabase as any)
+      const { data: pesertaData, error: pesertaError } = await (supabase as any)
         .from('peserta')
         .select('id, nama, email, jabatan, instansi')
         .in('id', pesertaIds)
+      
+      if (pesertaError) {
+        console.error('Error fetching peserta data:', pesertaError)
+      }
       
       // Combine absensi with peserta data
       for (const absen of absensiData) {
