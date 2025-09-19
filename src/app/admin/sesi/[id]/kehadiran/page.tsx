@@ -132,32 +132,36 @@ export default function KehadiranPage() {
         setAbsensi(kehadiranData)
       }
 
-      // Fetch peserta terdaftar
+      // Langsung ambil dari data absensi yang sudah ada peserta info
+      const pesertaFromAbsensi = kehadiranData?.map((a: any) => a.peserta).filter(Boolean) || []
+      
+      // Fetch peserta terdaftar sebagai backup
       const pesertaResponse = await fetch(`/api/sesi/${sesiId}/peserta`)
       let pesertaTerdaftar = []
       if (pesertaResponse.ok) {
         pesertaTerdaftar = await pesertaResponse.json()
       }
 
-      // Gabungkan dengan peserta yang sudah absen
-      const pesertaAbsen = kehadiranData?.map((a: any) => a.peserta).filter(Boolean) || []
+      // Gabungkan semua peserta
       const allPesertaMap = new Map()
       
-      // Tambahkan peserta terdaftar
-      pesertaTerdaftar.forEach((p: any) => {
+      // Prioritaskan peserta dari absensi (data lebih lengkap)
+      pesertaFromAbsensi.forEach((p: any) => {
         if (p && p.id) {
           allPesertaMap.set(p.id, p)
         }
       })
       
-      // Tambahkan peserta yang sudah absen (termasuk yang baru ditambahkan)
-      pesertaAbsen.forEach((p: any) => {
-        if (p && p.id) {
+      // Tambahkan peserta terdaftar yang belum ada
+      pesertaTerdaftar.forEach((p: any) => {
+        if (p && p.id && !allPesertaMap.has(p.id)) {
           allPesertaMap.set(p.id, p)
         }
       })
       
       const finalPesertaList = Array.from(allPesertaMap.values())
+      console.log('Absensi peserta:', pesertaFromAbsensi.length)
+      console.log('Terdaftar peserta:', pesertaTerdaftar.length) 
       console.log('Final peserta list:', finalPesertaList)
       setAllPeserta(finalPesertaList)
     } catch (error) {
