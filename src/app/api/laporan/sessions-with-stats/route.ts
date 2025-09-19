@@ -51,7 +51,7 @@ export async function GET() {
         }
 
         if (attendanceData) {
-          attendanceData.forEach((record) => {
+          attendanceData.forEach((record: any) => {
             switch (record.status_kehadiran) {
               case 'hadir':
                 stats.hadir++
