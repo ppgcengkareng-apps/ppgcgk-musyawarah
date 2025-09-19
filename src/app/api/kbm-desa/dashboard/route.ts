@@ -65,8 +65,8 @@ export async function GET(request: NextRequest) {
     let rataPencapaian = 0
     
     if (laporanData && laporanData.length > 0) {
-      const totalKehadiran = laporanData.reduce((sum, item) => sum + item.persentase_kehadiran, 0)
-      const totalPencapaian = laporanData.reduce((sum, item) => sum + item.pencapaian_target_materi, 0)
+      const totalKehadiran = laporanData.reduce((sum: number, item: any) => sum + (item.persentase_kehadiran || 0), 0)
+      const totalPencapaian = laporanData.reduce((sum: number, item: any) => sum + (item.pencapaian_target_materi || 0), 0)
       
       rataKehadiran = Math.round((totalKehadiran / laporanData.length) * 100) / 100
       rataPencapaian = Math.round((totalPencapaian / laporanData.length) * 100) / 100
@@ -167,8 +167,8 @@ async function getTrendBulanan(supabase: any, currentPeriode: string, desaIds: s
     let avgPencapaian = 0
     
     if (data && data.length > 0) {
-      avgKehadiran = Math.round((data.reduce((sum, item) => sum + item.persentase_kehadiran, 0) / data.length) * 100) / 100
-      avgPencapaian = Math.round((data.reduce((sum, item) => sum + item.pencapaian_target_materi, 0) / data.length) * 100) / 100
+      avgKehadiran = Math.round((data.reduce((sum: number, item: any) => sum + (item.persentase_kehadiran || 0), 0) / data.length) * 100) / 100
+      avgPencapaian = Math.round((data.reduce((sum: number, item: any) => sum + (item.pencapaian_target_materi || 0), 0) / data.length) * 100) / 100
     }
     
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
