@@ -33,7 +33,7 @@ export default function DesaDetailPage() {
   }, [desaId, periode])
   
   useEffect(() => {
-    if (desaData && periode) {
+    if (desaData && desaData.kelompok && periode) {
       fetchKelompokStatus()
     }
   }, [desaData, periode])
@@ -62,6 +62,7 @@ export default function DesaDetailPage() {
     try {
       if (!desaData || !desaData.kelompok) {
         console.log('No desa data or kelompok:', desaData)
+        setLoading(false)
         return
       }
 
@@ -69,26 +70,40 @@ export default function DesaDetailPage() {
       const kelompokStatus: Kelompok[] = []
       
       for (const kelompok of desaData.kelompok) {
-        const response = await fetch(`/api/kbm-desa/laporan?periode=${periode}&desa_id=${desaId}&kelompok=${encodeURIComponent(kelompok)}`)
-        const result = await response.json()
-        
-        if (result.success) {
-          const data = result.data
-          const totalCategories = 4 // PAUD, Pra Remaja, Remaja, Pra Nikah
-          const completedCategories = data.length
+        try {
+          const response = await fetch(`/api/kbm-desa/laporan?periode=${periode}&desa_id=${desaId}&kelompok=${encodeURIComponent(kelompok)}`)
+          const result = await response.json()
           
           let status: 'complete' | 'incomplete' | 'empty' = 'empty'
-          if (completedCategories === totalCategories) {
-            status = 'complete'
-          } else if (completedCategories > 0) {
-            status = 'incomplete'
+          let totalData = 0
+          let completedCategories = 0
+          
+          if (result.success && result.data) {
+            const data = result.data
+            totalData = data.length
+            completedCategories = data.length
+            const totalCategories = 4 // PAUD, Pra Remaja, Remaja, Pra Nikah
+            
+            if (completedCategories === totalCategories) {
+              status = 'complete'
+            } else if (completedCategories > 0) {
+              status = 'incomplete'
+            }
           }
 
           kelompokStatus.push({
             nama: kelompok,
             status,
-            totalData: data.length,
+            totalData,
             completedCategories
+          })
+        } catch (apiError) {
+          // Jika API error, tetap tambahkan kelompok dengan status empty
+          kelompokStatus.push({
+            nama: kelompok,
+            status: 'empty',
+            totalData: 0,
+            completedCategories: 0
           })
         }
       }
