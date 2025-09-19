@@ -43,7 +43,7 @@ export async function GET(
       .map((item: any) => item.peserta)
       .filter((peserta: any) => peserta && peserta.id)
       .map((peserta: any) => {
-        const absensi = absensiData?.find((a: any) => a.peserta_id === peserta.id)
+        const absensi = absensiData?.find((a: any) => a.peserta_id === peserta.id) as any
         return {
           peserta,
           absensi: absensi || null,
