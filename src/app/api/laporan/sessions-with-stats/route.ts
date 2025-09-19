@@ -27,7 +27,7 @@ export async function GET() {
 
     // Get attendance stats for each session
     const sessionsWithStats = await Promise.all(
-      (sessions || []).map(async (session) => {
+      (sessions || []).map(async (session: any) => {
         // Get total assigned participants
         const { count: totalPeserta } = await supabase
           .from('sesi_peserta')
