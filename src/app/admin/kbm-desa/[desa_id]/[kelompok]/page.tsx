@@ -61,6 +61,13 @@ export default function KelompokFormPage() {
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
+    // Initialize form data dengan empty form untuk semua kategori
+    const initialFormData: Record<string, FormData> = {}
+    KATEGORI_PROGRAM.forEach(kategori => {
+      initialFormData[kategori.id] = { ...EMPTY_FORM }
+    })
+    setFormData(initialFormData)
+    
     if (desaId && kelompok && periode) {
       fetchExistingData()
     }
@@ -112,7 +119,7 @@ export default function KelompokFormPage() {
     setFormData(prev => ({
       ...prev,
       [kategori]: {
-        ...prev[kategori],
+        ...(prev[kategori] || EMPTY_FORM),
         [field]: value
       }
     }))
@@ -288,7 +295,7 @@ export default function KelompokFormPage() {
                       id={`jumlah_murid_${kategori.id}`}
                       type="number"
                       min="0"
-                      value={formData[kategori.id]?.jumlah_murid || 0}
+                      value={formData[kategori.id]?.jumlah_murid ?? 0}
                       onChange={(e) => handleInputChange(kategori.id, 'jumlah_murid', parseInt(e.target.value) || 0)}
                     />
                   </div>
@@ -299,7 +306,7 @@ export default function KelompokFormPage() {
                       id={`jumlah_kelas_${kategori.id}`}
                       type="number"
                       min="0"
-                      value={formData[kategori.id]?.jumlah_kelas || 0}
+                      value={formData[kategori.id]?.jumlah_kelas ?? 0}
                       onChange={(e) => handleInputChange(kategori.id, 'jumlah_kelas', parseInt(e.target.value) || 0)}
                     />
                   </div>
@@ -311,7 +318,7 @@ export default function KelompokFormPage() {
                       type="number"
                       min="0"
                       max="100"
-                      value={formData[kategori.id]?.persentase_kehadiran || 0}
+                      value={formData[kategori.id]?.persentase_kehadiran ?? 0}
                       onChange={(e) => handleInputChange(kategori.id, 'persentase_kehadiran', parseInt(e.target.value) || 0)}
                     />
                   </div>
@@ -323,7 +330,7 @@ export default function KelompokFormPage() {
                       type="number"
                       min="0"
                       max="100"
-                      value={formData[kategori.id]?.pencapaian_target_materi || 0}
+                      value={formData[kategori.id]?.pencapaian_target_materi ?? 0}
                       onChange={(e) => handleInputChange(kategori.id, 'pencapaian_target_materi', parseInt(e.target.value) || 0)}
                     />
                   </div>
@@ -334,7 +341,7 @@ export default function KelompokFormPage() {
                       id={`pertemuan_kbm_${kategori.id}`}
                       type="number"
                       min="0"
-                      value={formData[kategori.id]?.pertemuan_kbm_kali || 0}
+                      value={formData[kategori.id]?.pertemuan_kbm_kali ?? 0}
                       onChange={(e) => handleInputChange(kategori.id, 'pertemuan_kbm_kali', parseInt(e.target.value) || 0)}
                     />
                   </div>
@@ -343,7 +350,7 @@ export default function KelompokFormPage() {
                     <Label htmlFor={`pengajar_${kategori.id}`}>Pengajar (MT, MS) *</Label>
                     <Input
                       id={`pengajar_${kategori.id}`}
-                      value={formData[kategori.id]?.pengajar_mt_ms || ''}
+                      value={formData[kategori.id]?.pengajar_mt_ms ?? ''}
                       onChange={(e) => handleInputChange(kategori.id, 'pengajar_mt_ms', e.target.value)}
                       placeholder="Contoh: MT: 2, MS: 3"
                     />
@@ -354,7 +361,7 @@ export default function KelompokFormPage() {
                   <Label htmlFor={`sarpras_${kategori.id}`}>Sarpras *</Label>
                   <Textarea
                     id={`sarpras_${kategori.id}`}
-                    value={formData[kategori.id]?.sarpras || ''}
+                    value={formData[kategori.id]?.sarpras ?? ''}
                     onChange={(e) => handleInputChange(kategori.id, 'sarpras', e.target.value)}
                     placeholder="Deskripsikan kondisi sarana dan prasarana..."
                   />
@@ -364,7 +371,7 @@ export default function KelompokFormPage() {
                   <Label htmlFor={`tahfidz_${kategori.id}`}>Tahfidz *</Label>
                   <Textarea
                     id={`tahfidz_${kategori.id}`}
-                    value={formData[kategori.id]?.tahfidz || ''}
+                    value={formData[kategori.id]?.tahfidz ?? ''}
                     onChange={(e) => handleInputChange(kategori.id, 'tahfidz', e.target.value)}
                     placeholder="Deskripsikan program tahfidz..."
                   />
@@ -374,7 +381,7 @@ export default function KelompokFormPage() {
                   <Label htmlFor={`laporan_musyawarah_${kategori.id}`}>Laporan Hasil Musyawarah KBM Desa</Label>
                   <Textarea
                     id={`laporan_musyawarah_${kategori.id}`}
-                    value={formData[kategori.id]?.laporan_musyawarah || ''}
+                    value={formData[kategori.id]?.laporan_musyawarah ?? ''}
                     onChange={(e) => handleInputChange(kategori.id, 'laporan_musyawarah', e.target.value)}
                     placeholder="Laporan hasil musyawarah (opsional)..."
                   />
@@ -384,7 +391,7 @@ export default function KelompokFormPage() {
                   <Label htmlFor={`kendala_saran_${kategori.id}`}>Kendala dan Saran ke PPG Daerah</Label>
                   <Textarea
                     id={`kendala_saran_${kategori.id}`}
-                    value={formData[kategori.id]?.kendala_saran || ''}
+                    value={formData[kategori.id]?.kendala_saran ?? ''}
                     onChange={(e) => handleInputChange(kategori.id, 'kendala_saran', e.target.value)}
                     placeholder="Kendala yang dihadapi dan saran (opsional)..."
                   />
