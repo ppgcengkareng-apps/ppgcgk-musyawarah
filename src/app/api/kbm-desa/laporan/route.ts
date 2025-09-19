@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
 
     const supabase = createClient()
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('laporan_kbm_desa')
       .insert({
         desa_id,
@@ -151,7 +151,7 @@ export async function PUT(request: NextRequest) {
 
     const supabase = createClient()
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('laporan_kbm_desa')
       .update({
         jumlah_murid,
