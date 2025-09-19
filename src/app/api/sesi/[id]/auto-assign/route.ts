@@ -39,7 +39,7 @@ export async function POST(
     }
 
     // Insert peserta baru ke sesi_peserta
-    const sesiPesertaData = pesertaBelumTerdaftar.map((peserta_id: string) => ({
+    const newSesiPesertaData = pesertaBelumTerdaftar.map((peserta_id: string) => ({
       sesi_id: sesiId,
       peserta_id,
       wajib_hadir: true,
@@ -48,7 +48,7 @@ export async function POST(
 
     const { error } = await (supabase as any)
       .from('sesi_peserta')
-      .insert(sesiPesertaData)
+      .insert(newSesiPesertaData)
 
     if (error) {
       console.error('Auto-assign error:', error)
