@@ -9,13 +9,5 @@ export const createServerClient = () => {
     throw new Error('Missing Supabase environment variables')
   }
   
-  console.log('Creating Supabase client with URL:', supabaseUrl)
-  console.log('Using service role key:', supabaseKey ? 'Present' : 'Missing')
-  
-  return createClient<Database>(supabaseUrl, supabaseKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  })
+  return createClient<Database>(supabaseUrl, supabaseKey)
 }

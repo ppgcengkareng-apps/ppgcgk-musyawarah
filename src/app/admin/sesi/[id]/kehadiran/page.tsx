@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, Users, CheckCircle, XCircle, Clock, FileText, Heart, RefreshCw } from 'lucide-react'
+import { ArrowLeft, Users, CheckCircle, XCircle, Clock, FileText, Heart } from 'lucide-react'
 import Link from 'next/link'
 
 interface Peserta {
@@ -16,12 +16,13 @@ interface Peserta {
   instansi: string
 }
 
-interface KehadiranData {
-  peserta: Peserta
-  absensi: any
+interface Absensi {
+  id: string
+  peserta_id: string
   status_kehadiran: string
-  waktu_absen: string | null
-  catatan: string | null
+  waktu_absen: string
+  catatan: string
+  peserta: Peserta
 }
 
 interface Sesi {
@@ -68,7 +69,8 @@ export default function KehadiranPage() {
   const sesiId = params.id as string
   
   const [sesi, setSesi] = useState<Sesi | null>(null)
-  const [kehadiranData, setKehadiranData] = useState<KehadiranData[]>([])
+  const [absensi, setAbsensi] = useState<Absensi[]>([])
+  const [allPeserta, setAllPeserta] = useState<Peserta[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -80,31 +82,38 @@ export default function KehadiranPage() {
   const fetchData = async () => {
     try {
       // Fetch sesi info
-      const sesiResponse = await fetch(`/api/sesi/${sesiId}`, { cache: 'no-store' })
+      const sesiResponse = await fetch(`/api/sesi/${sesiId}`)
       if (sesiResponse.ok) {
         const sesiData = await sesiResponse.json()
         setSesi(sesiData)
       }
 
-      // Fetch kehadiran data from new endpoint
-      const timestamp = new Date().getTime()
-      const kehadiranResponse = await fetch(`/api/sesi/${sesiId}/kehadiran?t=${timestamp}&r=${Math.random()}`, { 
-        cache: 'no-store',
-        method: 'GET',
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        }
-      })
-      
+      // Fetch kehadiran data
+      const kehadiranResponse = await fetch(`/api/absensi/sesi/${sesiId}`)
+      let kehadiranData = []
       if (kehadiranResponse.ok) {
-        const data = await kehadiranResponse.json()
-        console.log('Kehadiran data:', data)
-        setKehadiranData(data)
-      } else {
-        console.error('Failed to fetch kehadiran:', kehadiranResponse.status)
+        kehadiranData = await kehadiranResponse.json()
+        setAbsensi(kehadiranData)
       }
+
+      // Fetch peserta terdaftar
+      const pesertaResponse = await fetch(`/api/sesi/${sesiId}/peserta`)
+      let pesertaTerdaftar = []
+      if (pesertaResponse.ok) {
+        pesertaTerdaftar = await pesertaResponse.json()
+      }
+
+      // Gabungkan dengan peserta yang sudah absen tapi tidak terdaftar
+      const pesertaAbsen = kehadiranData?.map((a: any) => a.peserta).filter(Boolean) || []
+      const allPesertaMap = new Map()
+      
+      // Tambahkan peserta terdaftar
+      pesertaTerdaftar.forEach((p: any) => allPesertaMap.set(p.id, p))
+      
+      // Tambahkan peserta yang sudah absen
+      pesertaAbsen.forEach((p: any) => allPesertaMap.set(p.id, p))
+      
+      setAllPeserta(Array.from(allPesertaMap.values()))
     } catch (error) {
       console.error('Error fetching data:', error)
     } finally {
@@ -112,14 +121,27 @@ export default function KehadiranPage() {
     }
   }
 
+  const getKehadiranStatus = (pesertaId: string) => {
+    const kehadiran = absensi.find(a => a.peserta_id === pesertaId)
+    return kehadiran ? kehadiran.status_kehadiran : 'ghoib'
+  }
 
+  const getKehadiranWaktu = (pesertaId: string) => {
+    const kehadiran = absensi.find(a => a.peserta_id === pesertaId)
+    return kehadiran ? new Date(kehadiran.waktu_absen).toLocaleString('id-ID') : '-'
+  }
+
+  const getKehadiranCatatan = (pesertaId: string) => {
+    const kehadiran = absensi.find(a => a.peserta_id === pesertaId)
+    return kehadiran?.catatan || '-'
+  }
 
   const stats = {
-    total: kehadiranData.length,
-    hadir: kehadiranData.filter(k => k.status_kehadiran === 'hadir').length,
-    ghoib: kehadiranData.filter(k => k.status_kehadiran === 'ghoib').length,
-    izin: kehadiranData.filter(k => k.status_kehadiran === 'izin').length,
-    sakit: kehadiranData.filter(k => k.status_kehadiran === 'sakit').length
+    total: allPeserta.length,
+    hadir: absensi.filter(a => a.status_kehadiran === 'hadir').length,
+    ghoib: allPeserta.length - absensi.length,
+    izin: absensi.filter(a => a.status_kehadiran === 'izin').length,
+    sakit: absensi.filter(a => a.status_kehadiran === 'sakit').length
   }
 
   if (isLoading) {
@@ -136,30 +158,19 @@ export default function KehadiranPage() {
   return (
     <div className="p-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <Link href="/admin/sesi">
-            <Button variant="outline" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Kembali
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Kehadiran Peserta</h1>
-            <p className="text-gray-600 mt-1">
-              {sesi?.nama_sesi} - {sesi && new Date(sesi.tanggal).toLocaleDateString('id-ID')}
-            </p>
-          </div>
+      <div className="flex items-center gap-4 mb-6">
+        <Link href="/admin/sesi">
+          <Button variant="outline" size="sm">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Kembali
+          </Button>
+        </Link>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Kehadiran Peserta</h1>
+          <p className="text-gray-600 mt-1">
+            {sesi?.nama_sesi} - {sesi && new Date(sesi.tanggal).toLocaleDateString('id-ID')}
+          </p>
         </div>
-        <Button 
-          onClick={fetchData} 
-          variant="outline" 
-          size="sm"
-          disabled={isLoading}
-        >
-          <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-          Refresh Data
-        </Button>
       </div>
 
       {/* Stats Cards */}
@@ -221,8 +232,8 @@ export default function KehadiranPage() {
                 </tr>
               </thead>
               <tbody>
-                {kehadiranData.map((item, index) => {
-                  const { peserta, status_kehadiran, waktu_absen, catatan } = item
+                {allPeserta.map((peserta, index) => {
+                  const status = getKehadiranStatus(peserta.id)
                   return (
                     <tr key={peserta.id} className="border-b hover:bg-gray-50">
                       <td className="p-3">{index + 1}</td>
@@ -235,15 +246,13 @@ export default function KehadiranPage() {
                       <td className="p-3">{peserta.jabatan || '-'}</td>
                       <td className="p-3">{peserta.instansi || '-'}</td>
                       <td className="p-3">
-                        <Badge className={`${getStatusColor(status_kehadiran)} flex items-center gap-1 w-fit`}>
-                          {getStatusIcon(status_kehadiran)}
-                          {getStatusText(status_kehadiran)}
+                        <Badge className={`${getStatusColor(status)} flex items-center gap-1 w-fit`}>
+                          {getStatusIcon(status)}
+                          {getStatusText(status)}
                         </Badge>
                       </td>
-                      <td className="p-3 text-sm">
-                        {waktu_absen ? new Date(waktu_absen).toLocaleString('id-ID') : '-'}
-                      </td>
-                      <td className="p-3 text-sm">{catatan || '-'}</td>
+                      <td className="p-3 text-sm">{getKehadiranWaktu(peserta.id)}</td>
+                      <td className="p-3 text-sm">{getKehadiranCatatan(peserta.id)}</td>
                     </tr>
                   )
                 })}

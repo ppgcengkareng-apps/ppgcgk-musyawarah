@@ -9,15 +9,11 @@ export async function GET(
     const sesiId = params.id
     const supabase = createServerClient()
 
-    console.log('Fetching peserta for sesi:', sesiId)
-
     // Get peserta IDs assigned to this sesi
     const { data: sesiPesertaData, error: sesiError } = await (supabase as any)
       .from('sesi_peserta')
       .select('peserta_id')
       .eq('sesi_id', sesiId)
-
-    console.log('Sesi peserta data:', sesiPesertaData)
 
     if (sesiError) {
       console.error('Error fetching sesi_peserta:', sesiError)
@@ -27,38 +23,22 @@ export async function GET(
       )
     }
 
-    // Get peserta details using JOIN for better reliability
-    const { data: pesertaList, error: pesertaError } = await (supabase as any)
-      .from('sesi_peserta')
-      .select(`
-        peserta:peserta_id (
-          id,
-          nama,
-          email,
-          jabatan,
-          instansi
-        )
-      `)
-      .eq('sesi_id', sesiId)
-    
-    console.log('Raw peserta list:', pesertaList)
-    
-    // Transform the data
-    let finalPesertaList = []
-    if (pesertaList && !pesertaError) {
-      finalPesertaList = pesertaList
-        .map((item: any) => item.peserta)
-        .filter((p: any) => p && p.id)
+    // Get peserta details
+    let pesertaList = []
+    if (sesiPesertaData && sesiPesertaData.length > 0) {
+      const pesertaIds = sesiPesertaData.map((sp: any) => sp.peserta_id)
+      
+      const { data: pesertaData, error: pesertaError } = await (supabase as any)
+        .from('peserta')
+        .select('id, nama, email, jabatan, instansi')
+        .in('id', pesertaIds)
+      
+      if (!pesertaError) {
+        pesertaList = pesertaData || []
+      }
     }
-    
-    console.log('Final peserta list:', finalPesertaList)
 
-    console.log('Final peserta list:', finalPesertaList)
-    
-    // Set cache headers to prevent caching
-    const response = NextResponse.json(finalPesertaList)
-    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate')
-    return response
+    return NextResponse.json(pesertaList)
 
   } catch (error) {
     console.error('API Error:', error)

@@ -198,25 +198,11 @@ export async function PUT(
 
     // Update participants if provided
     if (peserta_ids && Array.isArray(peserta_ids)) {
-      console.log('=== UPDATE PARTICIPANTS DEBUG ===')
-      console.log('Sesi ID:', id)
-      console.log('New Peserta IDs:', peserta_ids)
-      
       // Delete existing participants
-      const { error: deleteError } = await (supabase as any)
+      await (supabase as any)
         .from('sesi_peserta')
         .delete()
         .eq('sesi_id', id)
-      
-      if (deleteError) {
-        console.error('Delete existing participants error:', deleteError)
-        return NextResponse.json(
-          { error: 'Gagal menghapus peserta lama' },
-          { status: 500 }
-        )
-      }
-      
-      console.log('Existing participants deleted successfully')
 
       // Insert new participants
       if (peserta_ids.length > 0) {
@@ -226,40 +212,22 @@ export async function PUT(
           wajib_hadir: true,
           created_at: new Date().toISOString()
         }))
-        
-        console.log('Inserting new participants:', sesiPesertaData)
 
-        const { data: insertData, error: relationError } = await (supabase as any)
+        const { error: relationError } = await (supabase as any)
           .from('sesi_peserta')
           .insert(sesiPesertaData)
-          .select()
 
         if (relationError) {
-          console.error('Insert new participants error:', relationError)
+          console.error('Update session-participant relation error:', relationError)
           return NextResponse.json(
-            { error: 'Gagal mengupdate data peserta', details: relationError },
+            { error: 'Gagal mengupdate data peserta' },
             { status: 500 }
           )
         }
-        
-        console.log('New participants inserted successfully:', insertData)
       }
-      
-      console.log('=== END UPDATE PARTICIPANTS DEBUG ===')
     }
 
-    // Verify the update by checking sesi_peserta
-    const { data: verifyData } = await (supabase as any)
-      .from('sesi_peserta')
-      .select('peserta_id')
-      .eq('sesi_id', id)
-    
-    console.log('Verification - Current participants in DB:', verifyData)
-    
-    return NextResponse.json({
-      ...data,
-      participants_updated: verifyData?.length || 0
-    })
+    return NextResponse.json(data)
 
   } catch (error) {
     console.error('Update session API error:', error)
