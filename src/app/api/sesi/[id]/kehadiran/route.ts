@@ -13,27 +13,21 @@ export async function GET(
     console.log('Sesi ID:', sesiId)
     console.log('Timestamp:', new Date().toISOString())
 
-    // Get all assigned peserta
-    const { data: allPesertaData, error: pesertaError } = await supabase
+    // Get all assigned peserta IDs first
+    const { data: sesiPesertaData, error: sesiPesertaError } = await supabase
       .from('sesi_peserta')
-      .select(`
-        peserta:peserta_id (
-          id,
-          nama,
-          email,
-          jabatan,
-          instansi
-        )
-      `)
+      .select('peserta_id')
       .eq('sesi_id', sesiId)
 
-    console.log('Sesi Peserta Raw Data:', allPesertaData)
-    console.log('Sesi Peserta Error:', pesertaError)
+    console.log('Sesi Peserta Raw Data:', sesiPesertaData)
+    console.log('Sesi Peserta Error:', sesiPesertaError)
 
-    if (pesertaError) {
-      console.error('Error fetching peserta:', pesertaError)
+    if (sesiPesertaError) {
+      console.error('Error fetching sesi_peserta:', sesiPesertaError)
       return NextResponse.json({ error: 'Gagal mengambil data peserta' }, { status: 500 })
     }
+
+    const assignedPesertaIds = sesiPesertaData?.map((sp: any) => sp.peserta_id) || []
 
     // Get absensi data
     const { data: absensiData, error: absensiError } = await supabase
@@ -50,7 +44,6 @@ export async function GET(
 
     // Get peserta who have attended but might not be in sesi_peserta
     const attendedPesertaIds = absensiData?.map((a: any) => a.peserta_id) || []
-    const assignedPesertaIds = allPesertaData?.map((item: any) => item.peserta?.id).filter(Boolean) || []
     const allPesertaIds = Array.from(new Set(assignedPesertaIds.concat(attendedPesertaIds)))
 
     console.log('Assigned Peserta IDs:', assignedPesertaIds)
@@ -64,6 +57,11 @@ export async function GET(
       .in('id', allPesertaIds)
 
     console.log('All Peserta Details:', allPesertaDetails)
+    console.log('Peserta Details Error:', pesertaDetailsError)
+
+    if (pesertaDetailsError) {
+      console.error('Error fetching peserta details:', pesertaDetailsError)
+    }
 
     // Combine data: all peserta with their attendance status
     const result = allPesertaDetails?.map((peserta: any) => {
@@ -76,6 +74,9 @@ export async function GET(
         catatan: absensi?.catatan || null
       }
     }) || []
+
+    console.log('Result count:', result.length)
+    console.log('Result details:', result.map(r => ({ id: r.peserta.id, nama: r.peserta.nama, status: r.status_kehadiran })))
 
     console.log('Final Result:', result)
     console.log('=== END KEHADIRAN API DEBUG ===')
