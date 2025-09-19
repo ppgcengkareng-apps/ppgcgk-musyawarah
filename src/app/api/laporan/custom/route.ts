@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
 }
 
 async function getCustomAttendanceReport(supabase: any, startDate: string, endDate: string, statusFilter: string) {
-  const { data: sesiData } = await (supabase as any)
+  const { data: sesiData } = await supabase
     .from('sesi_musyawarah')
     .select('id')
     .gte('tanggal', startDate)
@@ -51,7 +51,7 @@ async function getCustomAttendanceReport(supabase: any, startDate: string, endDa
   }
 
   const sesiIds = sesiData.map((s: any) => s.id)
-  let query = (supabase as any)
+  let query = supabase
     .from('absensi')
     .select('id, peserta_id, sesi_id, status_kehadiran, waktu_absen, catatan')
     .in('sesi_id', sesiIds)
@@ -69,8 +69,8 @@ async function getCustomAttendanceReport(supabase: any, startDate: string, endDa
     const allSesiIds = Array.from(new Set(absensiData.map((a: any) => a.sesi_id)))
     
     const [pesertaResult, sesiResult] = await Promise.all([
-      (supabase as any).from('peserta').select('id, nama, email').in('id', pesertaIds),
-      (supabase as any).from('sesi_musyawarah').select('id, nama_sesi, tanggal').in('id', allSesiIds)
+      supabase.from('peserta').select('id, nama, email').in('id', pesertaIds),
+      supabase.from('sesi_musyawarah').select('id, nama_sesi, tanggal').in('id', allSesiIds)
     ])
     
     for (const absen of absensiData) {
@@ -93,7 +93,7 @@ async function getCustomAttendanceReport(supabase: any, startDate: string, endDa
 }
 
 async function getCustomParticipantReport(supabase: any, startDate: string, endDate: string, roleFilter: string) {
-  let query = (supabase as any)
+  let query = supabase
     .from('peserta')
     .select('id, nama, email, nomor_hp, jabatan, instansi, role, aktif, created_at')
     .gte('created_at', startDate)
@@ -121,7 +121,7 @@ async function getCustomParticipantReport(supabase: any, startDate: string, endD
 }
 
 async function getCustomSessionReport(supabase: any, startDate: string, endDate: string) {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('sesi_musyawarah')
     .select('id, nama_sesi, tanggal, waktu_mulai, waktu_selesai, lokasi, tipe, status, maksimal_peserta, created_at')
     .gte('tanggal', startDate)
@@ -145,7 +145,7 @@ async function getCustomSessionReport(supabase: any, startDate: string, endDate:
 }
 
 async function getCustomNotesReport(supabase: any, startDate: string, endDate: string) {
-  const { data: sesiData } = await (supabase as any)
+  const { data: sesiData } = await supabase
     .from('sesi_musyawarah')
     .select('id')
     .gte('tanggal', startDate)
@@ -156,7 +156,7 @@ async function getCustomNotesReport(supabase: any, startDate: string, endDate: s
   }
 
   const sesiIds = sesiData.map((s: any) => s.id)
-  const { data: notulensiData, error } = await (supabase as any)
+  const { data: notulensiData, error } = await supabase
     .from('notulensi_sesi')
     .select('id, sesi_id, dibuat_oleh, judul, status, version, created_at, updated_at')
     .in('sesi_id', sesiIds)
@@ -170,8 +170,8 @@ async function getCustomNotesReport(supabase: any, startDate: string, endDate: s
     const pembuatIds = Array.from(new Set(notulensiData.map((n: any) => n.dibuat_oleh)))
     
     const [sesiResult, pembuatResult] = await Promise.all([
-      (supabase as any).from('sesi_musyawarah').select('id, nama_sesi, tanggal').in('id', allSesiIds),
-      (supabase as any).from('peserta').select('id, nama').in('id', pembuatIds)
+      supabase.from('sesi_musyawarah').select('id, nama_sesi, tanggal').in('id', allSesiIds),
+      supabase.from('peserta').select('id, nama').in('id', pembuatIds)
     ])
     
     for (const notulensi of notulensiData) {

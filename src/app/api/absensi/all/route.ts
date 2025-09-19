@@ -5,7 +5,7 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createServerClient()
 
-    const { data: attendanceRecords, error } = await (supabase as any)
+    const { data: attendanceRecords, error } = await supabase
       .from('absensi')
       .select(`
         id,

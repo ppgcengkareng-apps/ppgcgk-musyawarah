@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
         desa_id,
         kelompok,
         periode,
-        kategori_program,
+        kategori_program: kategori_program as any,
         jumlah_murid: Number(jumlah_murid),
         jumlah_kelas: Number(jumlah_kelas),
         persentase_kehadiran: Number(persentase_kehadiran),

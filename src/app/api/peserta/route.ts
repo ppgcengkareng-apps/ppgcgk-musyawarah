@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     const supabase = createServerClient()
 
     // Check if username already exists
-    const { data: existingUser } = await (supabase as any)
+    const { data: existingUser } = await supabase
       .from('peserta')
       .select('id')
       .eq('email', username)
@@ -79,20 +79,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { data: participant, error } = await (supabase as any)
+    const { data: participant, error } = await supabase
       .from('peserta')
       .insert({
         nama,
-        email: username, // Simpan username ke kolom email
+        email: username,
         nomor_hp: nomor_hp || null,
         jabatan: jabatan || null,
         instansi: instansi || null,
-        role: finalRole,
+        role: finalRole as any,
         password_hash: 'password123',
         aktif: true,
-        email_verified: false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        email_verified: false
       })
       .select()
       .single()
@@ -137,7 +135,7 @@ export async function PUT(request: NextRequest) {
       updateData.password_hash = password
     }
 
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('peserta')
       .update(updateData)
       .eq('id', id)
@@ -164,7 +162,7 @@ export async function DELETE(request: NextRequest) {
 
     const supabase = createServerClient()
 
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from('peserta')
       .delete()
       .eq('id', id)

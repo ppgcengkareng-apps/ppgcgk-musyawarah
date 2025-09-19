@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if peserta is invited to this session
-    const { data: invitation, error: invitationError } = await (supabase as any)
+    const { data: invitation, error: invitationError } = await supabase
       .from('sesi_peserta')
       .select('id')
       .eq('sesi_id', sesi_id)
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if already attended
-    const { data: existingAttendance } = await (supabase as any)
+    const { data: existingAttendance } = await supabase
       .from('absensi')
       .select('id')
       .eq('sesi_id', sesi_id)
@@ -62,14 +62,13 @@ export async function POST(request: NextRequest) {
     const userAgent = request.headers.get('user-agent') || 'unknown'
 
     // Insert attendance record
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('absensi')
       .insert({
         sesi_id,
         peserta_id,
-        status_kehadiran,
+        status_kehadiran: status_kehadiran as any,
         catatan: catatan || null,
-        waktu_absen: new Date().toISOString(),
         ip_address: clientIP,
         user_agent: userAgent
       })

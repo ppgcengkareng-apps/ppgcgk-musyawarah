@@ -5,7 +5,7 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createServerClient()
 
-    const { data: sessions, error } = await (supabase as any)
+    const { data: sessions, error } = await supabase
       .from('sesi_musyawarah')
       .select('*')
       .order('tanggal', { ascending: false })
@@ -60,10 +60,10 @@ export async function POST(request: NextRequest) {
     
     if (!createdBy) {
       // Find first admin user as fallback
-      const { data: adminUser, error: adminError } = await (supabase as any)
+      const { data: adminUser, error: adminError } = await supabase
         .from('peserta')
         .select('id')
-        .in('role', ['admin', 'super_admin', 'admin_kmm'])
+        .in('role', ['admin', 'super_admin', 'admin_kmm'] as any)
         .eq('aktif', true)
         .limit(1)
         .single()
@@ -72,15 +72,14 @@ export async function POST(request: NextRequest) {
         createdBy = adminUser.id
       } else {
         // Create default admin if none exists
-        const { data: newAdmin, error: createError } = await (supabase as any)
+        const { data: newAdmin, error: createError } = await supabase
           .from('peserta')
           .insert({
             nama: 'Admin PPG',
             email: 'admin@ppg.id',
-            role: 'admin',
+            role: 'admin' as any,
             password_hash: 'admin123',
-            aktif: true,
-            created_at: new Date().toISOString()
+            aktif: true
           })
           .select('id')
           .single()
@@ -105,7 +104,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Insert session
-    const { data: session, error: sessionError } = await (supabase as any)
+    const { data: session, error: sessionError } = await supabase
       .from('sesi_musyawarah')
       .insert({
         nama_sesi: (nama_sesi || 'Sesi Baru').substring(0, 255),
@@ -115,8 +114,8 @@ export async function POST(request: NextRequest) {
         waktu_selesai: waktu_selesai,
         timezone: 'WIB',
         lokasi: lokasi ? lokasi.substring(0, 200) : null,
-        tipe: (tipe || 'offline').substring(0, 20),
-        status: 'scheduled',
+        tipe: (tipe || 'offline') as any,
+        status: 'scheduled' as any,
         maksimal_peserta: parseInt(maksimal_peserta) || 100,
         batas_absen_mulai: 30,
         batas_absen_selesai: 15,
@@ -142,7 +141,7 @@ export async function POST(request: NextRequest) {
         created_at: new Date().toISOString()
       }))
 
-      const { error: relationError } = await (supabase as any)
+      const { error: relationError } = await supabase
         .from('sesi_peserta')
         .insert(sesiPesertaData)
 

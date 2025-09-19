@@ -83,7 +83,7 @@ async function getOverviewStats(supabase: any) {
 }
 
 async function getAttendanceReport(supabase: any) {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('absensi')
     .select(`
       id,
@@ -116,7 +116,7 @@ async function getAttendanceReport(supabase: any) {
 }
 
 async function getParticipantReport(supabase: any) {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('peserta')
     .select(`
       id,
@@ -139,7 +139,7 @@ async function getParticipantReport(supabase: any) {
 }
 
 async function getSessionReport(supabase: any) {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('sesi_musyawarah')
     .select(`
       id,
@@ -164,7 +164,7 @@ async function getSessionReport(supabase: any) {
 }
 
 async function getNotesReport(supabase: any) {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('notulensi_sesi')
     .select(`
       id,

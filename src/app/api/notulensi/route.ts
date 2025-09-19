@@ -65,10 +65,10 @@ export async function POST(request: NextRequest) {
     
     if (!createdBy) {
       // Find first admin user as fallback
-      const { data: adminUser, error: adminError } = await (supabase as any)
+      const { data: adminUser, error: adminError } = await supabase
         .from('peserta')
         .select('id')
-        .in('role', ['admin', 'super_admin', 'admin_kmm'])
+        .in('role', ['admin', 'super_admin', 'admin_kmm'] as any)
         .eq('aktif', true)
         .limit(1)
         .single()
@@ -77,15 +77,14 @@ export async function POST(request: NextRequest) {
         createdBy = adminUser.id
       } else {
         // Create default admin if none exists
-        const { data: newAdmin, error: createError } = await (supabase as any)
+        const { data: newAdmin, error: createError } = await supabase
           .from('peserta')
           .insert({
             nama: 'Admin PPG',
             email: 'admin@ppg.id',
-            role: 'admin',
+            role: 'admin' as any,
             password_hash: 'admin123',
-            aktif: true,
-            created_at: new Date().toISOString()
+            aktif: true
           })
           .select('id')
           .single()
@@ -109,7 +108,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('notulensi_sesi')
       .insert({
         sesi_id: sesi_id,
@@ -118,7 +117,7 @@ export async function POST(request: NextRequest) {
         pembahasan: isi_notulensi || '',
         keputusan: kesimpulan || '',
         tindak_lanjut: tindak_lanjut || '',
-        status: 'draft',
+        status: 'draft' as any,
         version: 1,
         dibuat_oleh: createdBy
       })
