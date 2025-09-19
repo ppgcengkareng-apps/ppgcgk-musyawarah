@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Copy data ke periode target
-    const insertData = sourceData.map(item => ({
+    const insertData = sourceData.map((item: any) => ({
       desa_id: item.desa_id,
       kelompok: item.kelompok,
       periode: target_periode,
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
       created_by
     }))
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('laporan_kbm_desa')
       .insert(insertData)
       .select()
