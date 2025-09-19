@@ -51,7 +51,7 @@ export async function GET(
     // Get peserta who have attended but might not be in sesi_peserta
     const attendedPesertaIds = absensiData?.map((a: any) => a.peserta_id) || []
     const assignedPesertaIds = allPesertaData?.map((item: any) => item.peserta?.id).filter(Boolean) || []
-    const allPesertaIds = [...new Set([...assignedPesertaIds, ...attendedPesertaIds])]
+    const allPesertaIds = Array.from(new Set(assignedPesertaIds.concat(attendedPesertaIds)))
 
     console.log('Assigned Peserta IDs:', assignedPesertaIds)
     console.log('Attended Peserta IDs:', attendedPesertaIds)
