@@ -74,8 +74,8 @@ export async function GET(request: NextRequest) {
 
     // Progress by desa
     const progressByDesa = allowedDesa.map(desa => {
-      const desaData = laporanData?.filter(item => item.desa_id === desa.id) || []
-      const kelompokWithData = new Set(desaData.map(item => item.kelompok))
+      const desaData = laporanData?.filter((item: any) => item.desa_id === desa.id) || []
+      const kelompokWithData = new Set(desaData.map((item: any) => item.kelompok))
       const lengkap = kelompokWithData.size
       const total = desa.kelompok_count
       const persentase = total > 0 ? Math.round((lengkap / total) * 100) : 0
@@ -92,22 +92,22 @@ export async function GET(request: NextRequest) {
     const kategoriStats = [
       { 
         name: 'PAUD/CBR', 
-        value: laporanData?.filter(item => item.kategori_program === 'paud_cbr').length || 0,
+        value: laporanData?.filter((item: any) => item.kategori_program === 'paud_cbr').length || 0,
         color: '#8884d8' 
       },
       { 
         name: 'Pra Remaja', 
-        value: laporanData?.filter(item => item.kategori_program === 'pra_remaja').length || 0,
+        value: laporanData?.filter((item: any) => item.kategori_program === 'pra_remaja').length || 0,
         color: '#82ca9d' 
       },
       { 
         name: 'Remaja', 
-        value: laporanData?.filter(item => item.kategori_program === 'remaja').length || 0,
+        value: laporanData?.filter((item: any) => item.kategori_program === 'remaja').length || 0,
         color: '#ffc658' 
       },
       { 
         name: 'Pra Nikah', 
-        value: laporanData?.filter(item => item.kategori_program === 'pra_nikah').length || 0,
+        value: laporanData?.filter((item: any) => item.kategori_program === 'pra_nikah').length || 0,
         color: '#ff7300' 
       }
     ]
