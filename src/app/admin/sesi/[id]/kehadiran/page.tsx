@@ -88,11 +88,13 @@ export default function KehadiranPage() {
 
       // Fetch kehadiran data from new endpoint
       const timestamp = new Date().getTime()
-      const kehadiranResponse = await fetch(`/api/sesi/${sesiId}/kehadiran?t=${timestamp}`, { 
+      const kehadiranResponse = await fetch(`/api/sesi/${sesiId}/kehadiran?t=${timestamp}&r=${Math.random()}`, { 
         cache: 'no-store',
+        method: 'GET',
         headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         }
       })
       
