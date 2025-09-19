@@ -23,6 +23,9 @@ export default function HomePage() {
               <Link href="/admin/login">
                 <Button variant="outline">Login Admin</Button>
               </Link>
+              <Link href="/admin/kbm-desa">
+                <Button variant="outline">Laporan KBM Desa</Button>
+              </Link>
               <Link href="/absen">
                 <Button>Absensi Peserta</Button>
               </Link>
