@@ -43,17 +43,17 @@ export async function GET(
         return null
       }
       
-      const attendance = (attendanceRecords || []).find(
+      const attendance = attendanceRecords?.find(
         (record: any) => record.peserta_id === peserta.id
-      )
+      ) as any
 
       return {
         id: peserta.id,
         nama: peserta.nama || 'Nama tidak tersedia',
         email: peserta.email || 'Email tidak tersedia',
-        status_kehadiran: attendance ? attendance.status_kehadiran : null,
-        waktu_absen: attendance ? attendance.waktu_absen : null,
-        catatan: attendance ? attendance.catatan : null
+        status_kehadiran: attendance?.status_kehadiran || null,
+        waktu_absen: attendance?.waktu_absen || null,
+        catatan: attendance?.catatan || null
       }
     }).filter(Boolean)
 
