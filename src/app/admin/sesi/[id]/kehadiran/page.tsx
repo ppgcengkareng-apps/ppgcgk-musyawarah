@@ -90,6 +90,28 @@ export default function KehadiranPage() {
     }
   }, [sesiId])
 
+  const handleAutoAssign = async () => {
+    try {
+      setIsRefreshing(true)
+      const response = await fetch(`/api/sesi/${sesiId}/auto-assign`, {
+        method: 'POST'
+      })
+      
+      if (response.ok) {
+        const result = await response.json()
+        alert(result.message)
+        fetchData()
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Gagal auto-assign peserta')
+      }
+    } catch (error) {
+      alert('Terjadi kesalahan sistem')
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
+
   const fetchData = async (isManualRefresh = false) => {
     try {
       if (isManualRefresh) {
@@ -199,15 +221,26 @@ export default function KehadiranPage() {
             </p>
           </div>
         </div>
-        <Button 
-          onClick={() => fetchData(true)} 
-          disabled={isRefreshing}
-          variant="outline"
-          size="sm"
-        >
-          <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-          {isRefreshing ? 'Memuat...' : 'Refresh'}
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={handleAutoAssign} 
+            disabled={isRefreshing}
+            variant="default"
+            size="sm"
+          >
+            <Users className="w-4 h-4 mr-2" />
+            Auto-Assign Peserta
+          </Button>
+          <Button 
+            onClick={() => fetchData(true)} 
+            disabled={isRefreshing}
+            variant="outline"
+            size="sm"
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? 'Memuat...' : 'Refresh'}
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
