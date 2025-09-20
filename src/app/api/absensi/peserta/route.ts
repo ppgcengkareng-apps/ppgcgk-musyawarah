@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     // Find peserta by email (used as username)
     const { data: peserta, error: pesertaError } = await (supabase as any)
       .from('peserta')
-      .select('id, nama, email, jabatan')
+      .select('id, nama, email, jabatan, instansi')
       .eq('email', username)
       .eq('role', 'peserta')
       .single()
@@ -74,7 +74,10 @@ export async function GET(request: NextRequest) {
     })).filter((s: any) => s.id) // Filter out null sessions
 
     return NextResponse.json({
-      peserta,
+      peserta: {
+        ...peserta,
+        bidang: peserta.instansi // Map instansi to bidang for consistency
+      },
       sessions: sessionsWithStatus || []
     })
 

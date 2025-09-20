@@ -29,8 +29,10 @@ export async function GET(
       .eq('sesi_id', sesiId)
       .order('waktu_absen', { ascending: true })
 
+    console.log('Query sesi_id:', sesiId)
     console.log('Absensi data with peserta:', absensiData)
     console.log('Total count:', absensiData?.length)
+    console.log('Absensi error:', absensiError)
 
     if (absensiError) {
       console.error('Error fetching attendance:', absensiError)

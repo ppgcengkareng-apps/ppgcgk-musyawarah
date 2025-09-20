@@ -76,6 +76,9 @@ export async function POST(request: NextRequest) {
       .select()
       .single()
 
+    console.log('Attendance inserted:', data)
+    console.log('Insert error:', error)
+
     if (error) {
       console.error('Database error:', error)
       return NextResponse.json(
