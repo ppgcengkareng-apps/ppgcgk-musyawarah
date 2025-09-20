@@ -132,37 +132,37 @@ export default function KehadiranPage() {
         setAbsensi(kehadiranData)
       }
 
-      // Langsung ambil dari data absensi yang sudah ada peserta info
-      const pesertaFromAbsensi = kehadiranData?.map((a: any) => a.peserta).filter(Boolean) || []
-      
-      // Fetch peserta terdaftar sebagai backup
+      // Fetch peserta terdaftar (PRIORITAS UTAMA)
       const pesertaResponse = await fetch(`/api/sesi/${sesiId}/peserta`)
       let pesertaTerdaftar = []
       if (pesertaResponse.ok) {
         pesertaTerdaftar = await pesertaResponse.json()
       }
 
-      // Gabungkan semua peserta
+      // Ambil peserta dari data absensi sebagai tambahan
+      const pesertaFromAbsensi = kehadiranData?.map((a: any) => a.peserta).filter(Boolean) || []
+      
+      // Gabungkan semua peserta dengan prioritas peserta terdaftar
       const allPesertaMap = new Map()
       
-      // Prioritaskan peserta dari absensi (data lebih lengkap)
-      pesertaFromAbsensi.forEach((p: any) => {
+      // PRIORITAS 1: Peserta terdaftar (semua peserta yang di-assign ke sesi)
+      pesertaTerdaftar.forEach((p: any) => {
         if (p && p.id) {
           allPesertaMap.set(p.id, p)
         }
       })
       
-      // Tambahkan peserta terdaftar yang belum ada
-      pesertaTerdaftar.forEach((p: any) => {
+      // PRIORITAS 2: Peserta dari absensi (jika ada data tambahan)
+      pesertaFromAbsensi.forEach((p: any) => {
         if (p && p.id && !allPesertaMap.has(p.id)) {
           allPesertaMap.set(p.id, p)
         }
       })
       
       const finalPesertaList = Array.from(allPesertaMap.values())
-      console.log('Absensi peserta:', pesertaFromAbsensi.length)
-      console.log('Terdaftar peserta:', pesertaTerdaftar.length) 
-      console.log('Final peserta list:', finalPesertaList)
+      console.log('Peserta terdaftar:', pesertaTerdaftar.length)
+      console.log('Peserta dari absensi:', pesertaFromAbsensi.length) 
+      console.log('Final peserta list:', finalPesertaList.length)
       setAllPeserta(finalPesertaList)
     } catch (error) {
       console.error('Error fetching data:', error)
@@ -190,10 +190,10 @@ export default function KehadiranPage() {
   const stats = {
     total: allPeserta.length,
     hadir: absensi.filter(a => a.status_kehadiran === 'hadir').length,
-    ghoib: allPeserta.length - absensi.length,
+    terlambat: absensi.filter(a => a.status_kehadiran === 'terlambat').length,
     izin: absensi.filter(a => a.status_kehadiran === 'izin').length,
     sakit: absensi.filter(a => a.status_kehadiran === 'sakit').length,
-    terlambat: absensi.filter(a => a.status_kehadiran === 'terlambat').length
+    ghoib: allPeserta.length - absensi.length
   }
 
   if (isLoading) {
@@ -248,7 +248,7 @@ export default function KehadiranPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
         <Card>
           <CardContent className="p-4 text-center">
             <Users className="w-8 h-8 text-blue-600 mx-auto mb-2" />
@@ -265,9 +265,9 @@ export default function KehadiranPage() {
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <XCircle className="w-8 h-8 text-red-600 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-red-600">{stats.ghoib}</div>
-            <div className="text-sm text-gray-600">Ghoib</div>
+            <Clock className="w-8 h-8 text-orange-600 mx-auto mb-2" />
+            <div className="text-2xl font-bold text-orange-600">{stats.terlambat}</div>
+            <div className="text-sm text-gray-600">Terlambat</div>
           </CardContent>
         </Card>
         <Card>
@@ -279,9 +279,16 @@ export default function KehadiranPage() {
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <Heart className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-blue-600">{stats.sakit}</div>
+            <Heart className="w-8 h-8 text-purple-600 mx-auto mb-2" />
+            <div className="text-2xl font-bold text-purple-600">{stats.sakit}</div>
             <div className="text-sm text-gray-600">Sakit</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <XCircle className="w-8 h-8 text-red-600 mx-auto mb-2" />
+            <div className="text-2xl font-bold text-red-600">{stats.ghoib}</div>
+            <div className="text-sm text-gray-600">Ghoib</div>
           </CardContent>
         </Card>
       </div>
