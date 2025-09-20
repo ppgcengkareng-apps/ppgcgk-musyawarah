@@ -124,19 +124,50 @@ export default function KehadiranPage() {
         setSesi(sesiData)
       }
 
-      // Fetch kehadiran data
-      const kehadiranResponse = await fetch(`/api/absensi/sesi/${sesiId}`)
+      // Fetch kehadiran data - try simple API first
       let kehadiranData = []
-      if (kehadiranResponse.ok) {
-        kehadiranData = await kehadiranResponse.json()
+      try {
+        const simpleResponse = await fetch(`/api/absensi/simple/${sesiId}`)
+        if (simpleResponse.ok) {
+          kehadiranData = await simpleResponse.json()
+          console.log('Simple API success:', kehadiranData.length)
+        } else {
+          // Fallback to original API
+          const kehadiranResponse = await fetch(`/api/absensi/sesi/${sesiId}`)
+          if (kehadiranResponse.ok) {
+            kehadiranData = await kehadiranResponse.json()
+            console.log('Original API fallback:', kehadiranData.length)
+          }
+        }
         setAbsensi(kehadiranData)
+      } catch (error) {
+        console.error('Error fetching attendance:', error)
+        setAbsensi([])
       }
 
       // Fetch peserta terdaftar (PRIORITAS UTAMA)
-      const pesertaResponse = await fetch(`/api/sesi/${sesiId}/peserta`)
       let pesertaTerdaftar = []
-      if (pesertaResponse.ok) {
-        pesertaTerdaftar = await pesertaResponse.json()
+      try {
+        // Try simple API first
+        const simpleResponse = await fetch(`/api/sesi/${sesiId}/participants-simple`)
+        if (simpleResponse.ok) {
+          pesertaTerdaftar = await simpleResponse.json()
+          console.log('Simple participants API success:', pesertaTerdaftar.length)
+        } else {
+          // Fallback to original API
+          const pesertaResponse = await fetch(`/api/sesi/${sesiId}/peserta`)
+          if (pesertaResponse.ok) {
+            const rawData = await pesertaResponse.json()
+            // Filter out invalid data
+            pesertaTerdaftar = rawData.filter((p: any) => 
+              p && p.id && p.nama && p.nama !== 'Loading...' && p.nama !== 'Unknown'
+            )
+            console.log('Original participants API fallback:', pesertaTerdaftar.length)
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching participants:', error)
+        pesertaTerdaftar = []
       }
 
       // Ambil peserta dari data absensi sebagai tambahan
