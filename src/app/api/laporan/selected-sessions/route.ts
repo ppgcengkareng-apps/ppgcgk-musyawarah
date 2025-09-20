@@ -125,10 +125,11 @@ export async function POST(request: NextRequest) {
     })
 
     // Flatten data for export
+    let nomorUrut = 1
     sessionGroups.forEach((group, sessionId) => {
       group.participants.forEach((participant: any) => {
         reportData.push({
-          session_id: sessionId,
+          no: nomorUrut++,
           nama_sesi: group.session.nama_sesi,
           tanggal_sesi: group.session.tanggal,
           waktu_mulai: group.session.waktu_mulai,
@@ -136,9 +137,9 @@ export async function POST(request: NextRequest) {
           lokasi: group.session.lokasi || '-',
           tipe_sesi: group.session.tipe,
           nama_peserta: participant.nama_peserta,
-          email_peserta: participant.email_peserta,
-          jabatan: participant.jabatan,
-          instansi: participant.instansi,
+          username: participant.email_peserta,
+          dapuan: participant.jabatan,
+          bidang: participant.instansi,
           status_kehadiran: participant.status_kehadiran,
           waktu_absen: participant.waktu_absen,
           catatan: participant.catatan
