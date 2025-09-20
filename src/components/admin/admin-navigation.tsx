@@ -15,9 +15,7 @@ import {
   X,
   Home,
   CheckSquare,
-  MessageSquare,
-  MapPin,
-  PieChart
+  MessageSquare
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -37,8 +35,6 @@ const navigation = [
   { name: 'Notulensi', href: '/admin/notulensi', icon: FileText },
   { name: 'Laporan', href: '/admin/laporan', icon: BarChart3 },
   { name: 'Absensi', href: '/admin/absensi', icon: CheckSquare },
-  { name: 'Laporan KBM Desa', href: '/admin/kbm-desa', icon: MapPin },
-  { name: 'Dashboard KBM', href: '/admin/dashboard-kbm', icon: PieChart },
 ]
 
 export default function AdminNavigation({ user }: AdminNavigationProps) {
@@ -71,15 +67,7 @@ export default function AdminNavigation({ user }: AdminNavigationProps) {
       'super_admin': 'Super Admin',
       'admin': 'Admin',
       'sekretaris_ppg': 'Sekretaris PPG',
-      'admin_kmm': 'Admin KMM',
-      'kbm_desa_kalideres': 'KBM Desa Kalideres',
-      'kbm_desa_bandara': 'KBM Desa Bandara',
-      'kbm_desa_kebon_jahe': 'KBM Desa Kebon Jahe',
-      'kbm_desa_cengkareng': 'KBM Desa Cengkareng',
-      'kbm_desa_kapuk_melati': 'KBM Desa Kapuk Melati',
-      'kbm_desa_taman_kota': 'KBM Desa Taman Kota',
-      'kbm_desa_jelambar': 'KBM Desa Jelambar',
-      'kbm_desa_cipondoh': 'KBM Desa Cipondoh'
+      'admin_kmm': 'Admin KMM'
     }
     return roles[role as keyof typeof roles] || role
   }
@@ -88,11 +76,6 @@ export default function AdminNavigation({ user }: AdminNavigationProps) {
     if (userRole === 'admin_kmm') {
       return navigation.filter(item => 
         ['Sesi Musyawarah', 'Notulensi'].includes(item.name)
-      )
-    }
-    if (userRole.startsWith('kbm_desa_')) {
-      return navigation.filter(item => 
-        ['Dashboard', 'Laporan KBM Desa', 'Dashboard KBM'].includes(item.name)
       )
     }
     return navigation
