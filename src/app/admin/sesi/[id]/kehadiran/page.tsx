@@ -76,15 +76,17 @@ export default function KehadiranPage() {
   const [allPeserta, setAllPeserta] = useState<Peserta[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [lastUpdateTime, setLastUpdateTime] = useState<string>('')
+  const [newAttendanceCount, setNewAttendanceCount] = useState(0)
 
   useEffect(() => {
     if (sesiId) {
       fetchData()
       
-      // Auto refresh setiap 30 detik
+      // Auto refresh setiap 10 detik untuk real-time updates
       const interval = setInterval(() => {
         fetchData()
-      }, 30000)
+      }, 10000)
       
       return () => clearInterval(interval)
     }
@@ -110,6 +112,12 @@ export default function KehadiranPage() {
     } finally {
       setIsRefreshing(false)
     }
+  }
+
+  const handleForceRefresh = async () => {
+    setIsRefreshing(true)
+    await fetchData(true)
+    setIsRefreshing(false)
   }
 
   const fetchData = async (isManualRefresh = false) => {
@@ -147,7 +155,14 @@ export default function KehadiranPage() {
             }
           }
         }
+        // Check for new attendance records
+        if (!isManualRefresh && absensi.length > 0 && kehadiranData.length > absensi.length) {
+          setNewAttendanceCount(kehadiranData.length - absensi.length)
+          setTimeout(() => setNewAttendanceCount(0), 5000) // Clear notification after 5s
+        }
+        
         setAbsensi(kehadiranData)
+        setLastUpdateTime(new Date().toLocaleTimeString('id-ID'))
       } catch (error) {
         console.error('Error fetching attendance:', error)
         setAbsensi([])
@@ -282,14 +297,23 @@ export default function KehadiranPage() {
             Auto-Assign Peserta
           </Button>
           <Button 
-            onClick={() => fetchData(true)} 
+            onClick={handleForceRefresh} 
             disabled={isRefreshing}
             variant="outline"
             size="sm"
           >
             <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-            {isRefreshing ? 'Memuat...' : 'Refresh'}
+            {isRefreshing ? 'Memuat...' : 'Refresh Data'}
           </Button>
+          <div className="text-xs text-gray-500 flex items-center gap-2">
+            <span>Auto-refresh: 10s</span>
+            {lastUpdateTime && <span>| Update: {lastUpdateTime}</span>}
+            {newAttendanceCount > 0 && (
+              <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium animate-pulse">
+                +{newAttendanceCount} baru!
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
