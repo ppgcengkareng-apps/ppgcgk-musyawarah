@@ -148,21 +148,28 @@ export default function KehadiranPage() {
       // Fetch peserta terdaftar (PRIORITAS UTAMA)
       let pesertaTerdaftar = []
       try {
-        // Try simple API first
-        const simpleResponse = await fetch(`/api/sesi/${sesiId}/participants-simple`)
-        if (simpleResponse.ok) {
-          pesertaTerdaftar = await simpleResponse.json()
-          console.log('Simple participants API success:', pesertaTerdaftar.length)
+        // Try ultra-simple API first
+        const ultraResponse = await fetch(`/api/sesi/${sesiId}/participants-ultra`)
+        if (ultraResponse.ok) {
+          pesertaTerdaftar = await ultraResponse.json()
+          console.log('Ultra participants API success:', pesertaTerdaftar.length)
         } else {
-          // Fallback to original API
-          const pesertaResponse = await fetch(`/api/sesi/${sesiId}/peserta`)
-          if (pesertaResponse.ok) {
-            const rawData = await pesertaResponse.json()
-            // Filter out invalid data
-            pesertaTerdaftar = rawData.filter((p: any) => 
-              p && p.id && p.nama && p.nama !== 'Loading...' && p.nama !== 'Unknown'
-            )
-            console.log('Original participants API fallback:', pesertaTerdaftar.length)
+          // Try simple API
+          const simpleResponse = await fetch(`/api/sesi/${sesiId}/participants-simple`)
+          if (simpleResponse.ok) {
+            pesertaTerdaftar = await simpleResponse.json()
+            console.log('Simple participants API fallback:', pesertaTerdaftar.length)
+          } else {
+            // Final fallback to original API
+            const pesertaResponse = await fetch(`/api/sesi/${sesiId}/peserta`)
+            if (pesertaResponse.ok) {
+              const rawData = await pesertaResponse.json()
+              // Filter out invalid data
+              pesertaTerdaftar = rawData.filter((p: any) => 
+                p && p.id && p.nama && p.nama !== 'Loading...' && p.nama !== 'Unknown'
+              )
+              console.log('Original participants API final fallback:', pesertaTerdaftar.length)
+            }
           }
         }
       } catch (error) {
