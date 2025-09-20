@@ -135,23 +135,30 @@ export default function KehadiranPage() {
       // Fetch kehadiran data - try ultra API first
       let kehadiranData = []
       try {
-        // Try ultra-simple API first
-        const ultraResponse = await fetch(`/api/absensi/ultra/${sesiId}`)
-        if (ultraResponse.ok) {
-          kehadiranData = await ultraResponse.json()
-          console.log('Ultra attendance API success:', kehadiranData.length)
+        // Try direct API first (most reliable)
+        const directResponse = await fetch(`/api/absensi/direct/${sesiId}`)
+        if (directResponse.ok) {
+          kehadiranData = await directResponse.json()
+          console.log('Direct attendance API success:', kehadiranData.length)
         } else {
-          // Try simple API
-          const simpleResponse = await fetch(`/api/absensi/simple/${sesiId}`)
-          if (simpleResponse.ok) {
-            kehadiranData = await simpleResponse.json()
-            console.log('Simple attendance API fallback:', kehadiranData.length)
+          // Try ultra-simple API
+          const ultraResponse = await fetch(`/api/absensi/ultra/${sesiId}`)
+          if (ultraResponse.ok) {
+            kehadiranData = await ultraResponse.json()
+            console.log('Ultra attendance API fallback:', kehadiranData.length)
           } else {
-            // Final fallback to original API
-            const kehadiranResponse = await fetch(`/api/absensi/sesi/${sesiId}`)
-            if (kehadiranResponse.ok) {
-              kehadiranData = await kehadiranResponse.json()
-              console.log('Original attendance API final fallback:', kehadiranData.length)
+            // Try simple API
+            const simpleResponse = await fetch(`/api/absensi/simple/${sesiId}`)
+            if (simpleResponse.ok) {
+              kehadiranData = await simpleResponse.json()
+              console.log('Simple attendance API fallback:', kehadiranData.length)
+            } else {
+              // Final fallback to original API
+              const kehadiranResponse = await fetch(`/api/absensi/sesi/${sesiId}`)
+              if (kehadiranResponse.ok) {
+                kehadiranData = await kehadiranResponse.json()
+                console.log('Original attendance API final fallback:', kehadiranData.length)
+              }
             }
           }
         }
