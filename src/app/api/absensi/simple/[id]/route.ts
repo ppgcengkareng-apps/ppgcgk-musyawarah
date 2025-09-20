@@ -11,14 +11,34 @@ export async function GET(
 
     console.log('Simple attendance query for session:', sesiId)
 
-    // Get raw attendance data first
-    const { data: rawAbsensi, error: rawError } = await (supabase as any)
+    // Get raw attendance data first - try different approaches
+    let rawAbsensi = null
+    let rawError = null
+
+    // Try approach 1: Select all fields
+    const { data: rawAbsensi1, error: rawError1 } = await (supabase as any)
       .from('absensi')
       .select('*')
       .eq('sesi_id', sesiId)
       .order('waktu_absen', { ascending: true })
 
+    if (rawAbsensi1 && rawAbsensi1.length > 0) {
+      rawAbsensi = rawAbsensi1
+      rawError = rawError1
+    } else {
+      // Try approach 2: Select specific fields
+      const { data: rawAbsensi2, error: rawError2 } = await (supabase as any)
+        .from('absensi')
+        .select('id, peserta_id, sesi_id, status_kehadiran, waktu_absen, catatan')
+        .eq('sesi_id', sesiId)
+        .order('waktu_absen', { ascending: true })
+      
+      rawAbsensi = rawAbsensi2
+      rawError = rawError2
+    }
+
     console.log('Raw attendance count:', rawAbsensi?.length || 0)
+    console.log('Raw attendance error:', rawError)
 
     if (rawError) {
       console.error('Raw attendance error:', rawError)

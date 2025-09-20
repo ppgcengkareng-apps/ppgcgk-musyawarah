@@ -124,19 +124,27 @@ export default function KehadiranPage() {
         setSesi(sesiData)
       }
 
-      // Fetch kehadiran data - try simple API first
+      // Fetch kehadiran data - try ultra API first
       let kehadiranData = []
       try {
-        const simpleResponse = await fetch(`/api/absensi/simple/${sesiId}`)
-        if (simpleResponse.ok) {
-          kehadiranData = await simpleResponse.json()
-          console.log('Simple API success:', kehadiranData.length)
+        // Try ultra-simple API first
+        const ultraResponse = await fetch(`/api/absensi/ultra/${sesiId}`)
+        if (ultraResponse.ok) {
+          kehadiranData = await ultraResponse.json()
+          console.log('Ultra attendance API success:', kehadiranData.length)
         } else {
-          // Fallback to original API
-          const kehadiranResponse = await fetch(`/api/absensi/sesi/${sesiId}`)
-          if (kehadiranResponse.ok) {
-            kehadiranData = await kehadiranResponse.json()
-            console.log('Original API fallback:', kehadiranData.length)
+          // Try simple API
+          const simpleResponse = await fetch(`/api/absensi/simple/${sesiId}`)
+          if (simpleResponse.ok) {
+            kehadiranData = await simpleResponse.json()
+            console.log('Simple attendance API fallback:', kehadiranData.length)
+          } else {
+            // Final fallback to original API
+            const kehadiranResponse = await fetch(`/api/absensi/sesi/${sesiId}`)
+            if (kehadiranResponse.ok) {
+              kehadiranData = await kehadiranResponse.json()
+              console.log('Original attendance API final fallback:', kehadiranData.length)
+            }
           }
         }
         setAbsensi(kehadiranData)
