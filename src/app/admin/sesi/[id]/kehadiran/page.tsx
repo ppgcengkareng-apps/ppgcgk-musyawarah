@@ -135,12 +135,18 @@ export default function KehadiranPage() {
       // Fetch kehadiran data - try ultra API first
       let kehadiranData = []
       try {
-        // Try direct API first (most reliable)
-        const directResponse = await fetch(`/api/absensi/direct/${sesiId}`)
-        if (directResponse.ok) {
-          kehadiranData = await directResponse.json()
-          console.log('Direct attendance API success:', kehadiranData.length)
+        // Try raw API first (most reliable)
+        const rawResponse = await fetch(`/api/absensi/raw/${sesiId}`)
+        if (rawResponse.ok) {
+          kehadiranData = await rawResponse.json()
+          console.log('Raw attendance API success:', kehadiranData.length)
         } else {
+          // Try direct API
+          const directResponse = await fetch(`/api/absensi/direct/${sesiId}`)
+          if (directResponse.ok) {
+            kehadiranData = await directResponse.json()
+            console.log('Direct attendance API fallback:', kehadiranData.length)
+          } else {
           // Try ultra-simple API
           const ultraResponse = await fetch(`/api/absensi/ultra/${sesiId}`)
           if (ultraResponse.ok) {
@@ -152,12 +158,13 @@ export default function KehadiranPage() {
             if (simpleResponse.ok) {
               kehadiranData = await simpleResponse.json()
               console.log('Simple attendance API fallback:', kehadiranData.length)
-            } else {
-              // Final fallback to original API
-              const kehadiranResponse = await fetch(`/api/absensi/sesi/${sesiId}`)
-              if (kehadiranResponse.ok) {
-                kehadiranData = await kehadiranResponse.json()
-                console.log('Original attendance API final fallback:', kehadiranData.length)
+              } else {
+                // Final fallback to original API
+                const kehadiranResponse = await fetch(`/api/absensi/sesi/${sesiId}`)
+                if (kehadiranResponse.ok) {
+                  kehadiranData = await kehadiranResponse.json()
+                  console.log('Original attendance API final fallback:', kehadiranData.length)
+                }
               }
             }
           }
