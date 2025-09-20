@@ -25,7 +25,7 @@ export async function GET(
     console.log('Found attendance records:', allAttendance.length)
 
     // Get all unique participant IDs
-    const participantIds = [...new Set(allAttendance.map((a: any) => a.peserta_id))]
+    const participantIds = Array.from(new Set(allAttendance.map((a: any) => a.peserta_id)))
     
     // Get all participants in one query
     const { data: participants } = await (supabase as any)
